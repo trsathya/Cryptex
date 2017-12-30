@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.license      = "MIT"
   s.author       = "Sathyakumar Rajaraman"
   s.source       = { :git => "https://github.com/trsathya/cryptex.git", :tag => "#{s.version}" }
-  s.source_files  = "Classes", "Classes/**/*.{h,m}"
+  s.source_files  = "Classes"
   s.exclude_files = "Classes/Exclude"
   s.dependency "CryptoSwift"
 end
