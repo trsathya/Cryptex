@@ -17,6 +17,6 @@ Pod::Spec.new do |s|
   s.dependency "CryptoSwift"
   s.default_subspec = "All"
   s.subspec "All" do |ss|
-    ss.source_files  = "**/*"
+    ss.source_files  = "Common/**/*.swift"
   end
 end
