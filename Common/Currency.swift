@@ -8,18 +8,24 @@
 
 import Foundation
 
-struct Currency: Hashable, Comparable {
-    let name: String
-    let code: String
-    let type: Category
+public struct Currency: Hashable, Comparable {
+    public let name: String
+    public let code: String
+    public let type: Category
     
-    var hashValue: Int {
+    public init(name: String, code: String, type: Category) {
+        self.name = name
+        self.code = code
+        self.type = type
+    }
+    
+    public var hashValue: Int {
         get {
             return code.hashValue
         }
     }
     
-    static func <(lhs: Currency, rhs: Currency) -> Bool {
+    public static func <(lhs: Currency, rhs: Currency) -> Bool {
         if lhs.name == rhs.name {
             return lhs.code < rhs.code
         } else {
@@ -27,11 +33,11 @@ struct Currency: Hashable, Comparable {
         }
     }
     
-    static func ==(lhs: Currency, rhs: Currency) -> Bool {
+    public static func ==(lhs: Currency, rhs: Currency) -> Bool {
         return lhs.code.lowercased() == rhs.code.lowercased()
     }
     
-    enum Category {
+    public enum Category {
         case notDetermined
         case fiat
         case crypto
