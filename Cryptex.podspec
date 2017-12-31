@@ -18,12 +18,17 @@ Pod::Spec.new do |s|
   s.default_subspec = "All"
   s.subspec "All" do |ss|
     ss.dependency 'Cryptex/Gemini'
+    ss.dependency 'Cryptex/GDAX'
   end
   s.subspec "Common" do |ss|
     ss.source_files  = "Common/**/*.swift"
   end
   s.subspec "Gemini" do |ss|
     ss.source_files  = "Gemini/**/*.swift"
+    ss.dependency 'Cryptex/Common'
+  end
+  s.subspec "GDAX" do |ss|
+    ss.source_files  = "GDAX/**/*.swift"
     ss.dependency 'Cryptex/Common'
   end
 end
