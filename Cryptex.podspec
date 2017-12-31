@@ -19,6 +19,7 @@ Pod::Spec.new do |s|
   s.subspec "All" do |ss|
     ss.dependency 'Cryptex/Gemini'
     ss.dependency 'Cryptex/GDAX'
+    ss.dependency 'Cryptex/Poloniex'
   end
   s.subspec "Common" do |ss|
     ss.source_files  = "Common/**/*.swift"
@@ -29,6 +30,10 @@ Pod::Spec.new do |s|
   end
   s.subspec "GDAX" do |ss|
     ss.source_files  = "GDAX/**/*.swift"
+    ss.dependency 'Cryptex/Common'
+  end
+  s.subspec "Poloniex" do |ss|
+    ss.source_files  = "Poloniex/**/*.swift"
     ss.dependency 'Cryptex/Common'
   end
 end
