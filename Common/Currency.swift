@@ -8,11 +8,6 @@
 
 import Foundation
 
-public protocol CurrencyType {
-    var name: String { get }
-    var code: String { get }
-}
-
 public struct Currency: CurrencyType, Hashable, Comparable {
     public let name: String
     public let code: String
