@@ -19,6 +19,10 @@ public struct Currency: Hashable, Comparable {
         self.type = type
     }
     
+    public init(code: String) {
+        self.init(name: code, code: code, type: .notDetermined)
+    }
+    
     public var hashValue: Int {
         get {
             return code.hashValue
