@@ -1,6 +1,6 @@
 //
 //  Currency.swift
-//  CryptEx
+//  Cryptex
 //
 //  Created by Sathyakumar Rajaraman on 12/30/17.
 //  Copyright © 2017 Sathyakumar. All rights reserved.

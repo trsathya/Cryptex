@@ -38,7 +38,8 @@ public struct CurrencyPair: Hashable, Comparable {
     }
     
     public var displayName: String {
-        return quantity.code + price.code
+        let symbol = quantity.code + price.code
+        return symbol.uppercased()
     }
     
     public var hashValue: Int {
