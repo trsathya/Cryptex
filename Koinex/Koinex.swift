@@ -34,6 +34,75 @@ public struct Koinex {
         
         public var tickerResponse: (response: HTTPURLResponse?, tickers: [Koinex.Ticker]) = (nil, [])
     }
+    
+    public enum API {
+        case ticker
+    }
+    
+    public class Service: Network {
+        
+        fileprivate let store = Koinex.Store.shared
+        
+        public func getTickers(completion: @escaping (ResponseType) -> Void) {
+            let apiType = Koinex.API.ticker
+            if apiType.checkInterval(response: store.tickerResponse.response) {
+                completion(.cached)
+            } else {
+                dataTaskFor(api: apiType, completion: { (json, httpResponse, error) in
+                    guard let json = json as? [String: Any], let prices = json["prices"] as? [String: Any] else {
+                        print("Error: Cast Failed in \(#function)")
+                        return
+                    }
+                    var tickers: [Koinex.Ticker] = []
+                    for (key, value) in prices {
+                        let currency = self.userPreference.currencyStore.forCode(key)
+                        let inr = self.userPreference.currencyStore.forCode("inr")
+                        let symbol = CurrencyPair(quantity: currency, price: inr)
+                        let price = NSDecimalNumber(any: value)
+                        let ticker = Koinex.Ticker(symbol: symbol, price: price)
+                        tickers.append(ticker)
+                    }
+                    self.store.tickerResponse = (httpResponse, tickers)
+                    completion(.fetched)
+                }).resume()
+            }
+        }
+    }
 }
 
-
+extension Koinex.API: APIType {
+    
+    public var host: String {
+        return "https://koinex.in/api"
+    }
+    
+    public var path: String {
+        switch self {
+        case .ticker: return "/ticker"
+        }
+    }
+    
+    public var httpMethod: HttpMethod {
+        return .GET
+    }
+    
+    public var authenticated: Bool {
+        return false
+    }
+    
+    public var loggingEnabled: LogLevel {
+        switch self {
+        case .ticker:              return .url
+        }
+    }
+    
+    public var postData: [String: String] {
+        return [:]
+    }
+    
+    public var refetchInterval: TimeInterval {
+        switch self {
+        case .ticker:              return .aMinute
+        }
+    }
+}
