@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct Currency: CurrencyType, Hashable, Comparable {
+public struct Currency: Hashable, Comparable {
     public let name: String
     public let code: String
     public let type: Category

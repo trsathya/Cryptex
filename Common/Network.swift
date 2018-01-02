@@ -12,13 +12,15 @@ open class Network {
     private let session: URLSession
     private var previousNonce: Int64 = 0
     private let nonceQueue = DispatchQueue(label: "com.sathyakumar.cryptex.network.nonce")
+    public let userPreference: UserPreference
     
     public var isMock: Bool {
         return session is MockURLSession
     }
     
-    public init(session: URLSession) {
+    public init(session: URLSession, userPreference: UserPreference) {
         self.session = session
+        self.userPreference = userPreference
     }
     
     public func dataTaskFor(api: APIType, completion: ((Any, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {

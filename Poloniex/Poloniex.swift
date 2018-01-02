@@ -7,6 +7,23 @@
 //
 
 import Foundation
+import CryptoSwift
+
+public extension CurrencyPair {
+    
+    var poloniexSymbol: String {
+        get {
+            return price.code + "_" + quantity.code
+        }
+    }
+    
+    public init(poloniexSymbol: String, currencyStore: CurrencyStoreType.Type) {
+        let currencySymbols = poloniexSymbol.components(separatedBy: "_")
+        let quantity = currencyStore.forCode(currencySymbols[1])
+        let price = currencyStore.forCode(currencySymbols[0])
+        self.init(quantity: quantity, price: price)
+    }
+}
 
 public struct Poloniex {
     public struct Ticker: Comparable {
@@ -53,4 +70,582 @@ public struct Poloniex {
             return lhs.lastInUSD.compare(rhs.lastInUSD) == .orderedSame
         }
     }
+    
+    public struct PastTrade {
+        public var globalTradeID: UInt32
+        public var tradeID: String
+        public var date: Date = Date()
+        public var rate: NSDecimalNumber
+        public var amount: NSDecimalNumber
+        public var total: NSDecimalNumber
+        public var fee: NSDecimalNumber
+        public var orderNumber: String
+        public var type: TransactionType = .none
+        public var category: String
+        
+        public init(json: [String: Any]) {
+            globalTradeID = json["globalTradeID"] as! UInt32
+            tradeID = json["tradeID"] as! String
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            if let string = json["date"] as? String, let value = df.date(from: string) {
+                date = value
+            }
+            rate = NSDecimalNumber(any: json["rate"])
+            amount = NSDecimalNumber(any: json["amount"])
+            total = NSDecimalNumber(any: json["total"])
+            fee = NSDecimalNumber(any: json["fee"])
+            orderNumber = json["orderNumber"] as! String
+            if let string = json["type"] as? String, let value = TransactionType(rawValue: string.lowercased()) {
+                type = value
+            }
+            category = json["category"] as! String
+        }
+    }
+    
+    public struct FeeInfo {
+        public var makerFee: NSDecimalNumber
+        public var takerFee: NSDecimalNumber
+        public var thirtyDayVolume: NSDecimalNumber
+        public var nextTier: NSDecimalNumber
+        
+        public init(json: [String: Any]) {
+            makerFee = NSDecimalNumber(any: json["makerFee"])
+            takerFee = NSDecimalNumber(any: json["takerFee"])
+            thirtyDayVolume = NSDecimalNumber(any: json["thirtyDayVolume"])
+            nextTier = NSDecimalNumber(any: json["nextTier"])
+        }
+    }
+    
+    public struct Deposit {
+        public var currency: Currency
+        public var address: String
+        public var amount: NSDecimalNumber
+        public var confirmations: Int
+        public var txid: String
+        public var timestamp: Date
+        public var status: String
+        
+        public init(json: [String: Any], currencyStore: CurrencyStoreType.Type) {
+            currency = currencyStore.forCode(json["currency"] as? String ?? "")
+            address = json["address"] as? String ?? ""
+            amount = NSDecimalNumber(any: json["amount"])
+            confirmations = json["confirmations"] as? Int ?? 0
+            txid = json["txid"] as? String ?? ""
+            timestamp = Date(timeIntervalSince1970: json["timestamp"] as? TimeInterval ?? 0)
+            status = json["status"] as? String ?? ""
+        }
+    }
+    
+    public struct Withdrawal {
+        public var withdrawalNumber: Int
+        public var currency: Currency
+        public var address: String
+        public var amount: NSDecimalNumber
+        public var timestamp: Date
+        public var status: String
+        public var ipAddress: String
+        
+        public init(json: [String: Any], currencyStore: CurrencyStoreType.Type) {
+            withdrawalNumber = json["withdrawalNumber"] as? Int ?? 0
+            currency = currencyStore.forCode(json["currency"] as? String ?? "")
+            address = json["address"] as? String ?? ""
+            amount = NSDecimalNumber(any: json["amount"])
+            timestamp = Date(timeIntervalSince1970: json["timestamp"] as? TimeInterval ?? 0)
+            status = json["status"] as? String ?? ""
+            ipAddress = json["ipAddress"] as? String ?? ""
+        }
+    }
+    
+    public class Store: ExchangeDataStoreType {
+        public static var shared = Store()
+        
+        public var name: String = "Poloniex"
+        
+        private init() { }
+        
+        public var tickerResponse: HTTPURLResponse? = nil
+        public var poloniexTickerByQuantityCCY: [[Poloniex.Ticker]] = []
+        public var poloniexTickerByPriceCCY: [[Poloniex.Ticker]] = []
+        public var poloniexTickerByName: [[Poloniex.Ticker]] = []
+        public var balanceResponse: (response: HTTPURLResponse?, balances: [Currency: Balance]) = (nil, [:])
+        public var feeInfoResponse: (response: HTTPURLResponse?, feeInfo: Poloniex.FeeInfo?) = (nil, nil)
+        public var pastTradesResponse: (response: HTTPURLResponse?, pastTrades: [CurrencyPair: [Poloniex.PastTrade]]) = (nil, [:])
+        public var depositsWithdrawalsResponse: (response: HTTPURLResponse?, deposits: [Poloniex.Deposit], withdrawals: [Poloniex.Withdrawal]) = (nil, [], [])
+    }
+    
+    public class Service: Network {
+        
+        private let key: String
+        private let secret: String
+        fileprivate let store = Poloniex.Store.shared
+        
+        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
+            self.key = key
+            self.secret = secret
+            super.init(session: session, userPreference: userPreference)
+        }
+        
+        public func balanceInPreferredCurrency(balance: BalanceType) -> NSDecimalNumber {
+            
+            let fiatCurrencyPair = CurrencyPair(quantity: balance.currency, price: userPreference.fiat)
+            let cryptoCurrencyPair = CurrencyPair(quantity: balance.currency, price: userPreference.crypto)
+            
+            if let tickerByName = store.poloniexTickerByName.first {
+                if let ticker = (tickerByName.filter {$0.symbol == fiatCurrencyPair}).first {
+                    return balance.quantity.multiplying(by: ticker.lastInUSD)
+                } else if let ticker = (tickerByName.filter {$0.symbol == cryptoCurrencyPair}).first {
+                    return balance.quantity.multiplying(by: ticker.lastInUSD)
+                } else {
+                    return balance.quantity
+                }
+            } else {
+                return balance.quantity
+            }
+        }
+        
+        public func getTotalBalance() -> NSDecimalNumber {
+            var totalBalance = NSDecimalNumber.zero
+            store.balanceResponse.balances.keys.forEach { currency in
+                if let balance = store.balanceResponse.balances[currency] {
+                    let balanceInPreferredCurrency = self.balanceInPreferredCurrency(balance: balance)
+                    totalBalance = totalBalance.adding(balanceInPreferredCurrency)
+                }
+            }
+            return totalBalance
+        }
+        
+        public func returnTicker(completion: @escaping (ResponseType, String?) -> Void) {
+            
+            let apiType = Poloniex.PublicAPI.returnTicker
+            
+            if apiType.checkInterval(response: store.tickerResponse) {
+                completion(.cached, nil)
+            } else {
+                poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+                    
+                    if let json = json as? String {
+                        completion(.fetched, json) // return response string for display on web view.
+                    }
+                    
+                    guard let json = json as? [String: Any] else { return }
+                    
+                    var date = Date()
+                    if let dateString = httpResponse?.allHeaderFields["Date"] as? String, let parsedDate = DateFormatter.httpHeader.date(from: dateString) {
+                        date = parsedDate
+                    }
+                    var tickers = json.flatMap { Poloniex.Ticker(json: $0.value, symbol: CurrencyPair(poloniexSymbol: $0.key, currencyStore: self.userPreference.currencyStore), timestamp: date) }
+                    
+                    tickers = tickers.map({ (ticker) -> Poloniex.Ticker in
+                        if ticker.symbol.price == self.userPreference.fiat {
+                            var t = ticker
+                            t.lastInUSD = ticker.last
+                            return t
+                        } else if let usdPrice = tickers.filter({ (innerTicker) -> Bool in
+                            return ticker.symbol.price == innerTicker.symbol.quantity && innerTicker.symbol.price == self.userPreference.fiat
+                        }).first?.last {
+                            var t = ticker
+                            t.lastInUSD = usdPrice.multiplying(by: ticker.last)
+                            return t
+                        }
+                        return ticker
+                    })
+                    
+                    var byQuantityCCY: [Currency: [Poloniex.Ticker]] = [:]
+                    var byPriceCCY: [Currency: [Poloniex.Ticker]] = [:]
+                    
+                    Set(tickers.map { $0.symbol.quantity }).forEach { quantity in
+                        byQuantityCCY[quantity] = []
+                    }
+                    
+                    Set(tickers.map { $0.symbol.price }).forEach { price in
+                        byPriceCCY[price] = []
+                    }
+                    
+                    tickers.forEach { ticker in
+                        byQuantityCCY[ticker.symbol.quantity]?.append(ticker)
+                        byPriceCCY[ticker.symbol.price]?.append(ticker)
+                    }
+                    
+                    
+                    self.store.poloniexTickerByQuantityCCY = byQuantityCCY.values.sorted(by: { (leftArray, rightArray) -> Bool in
+                        guard let left = leftArray.first, let right = rightArray.first else { return false }
+                        return left.lastInUSD.compare(right.lastInUSD) == .orderedDescending
+                    })
+                    self.store.poloniexTickerByPriceCCY = byPriceCCY.keys.flatMap { byPriceCCY[$0] }
+                    
+                    self.store.poloniexTickerByName = [tickers]
+                    self.store.tickerResponse = httpResponse
+                    completion(.fetched, nil)
+                    }.resume()
+            }
+        }
+        
+        public func returnBalances(completion: @escaping (ResponseType) -> Void) {
+            
+            let apiType = Poloniex.PrivateAPI.returnBalances
+            
+            if apiType.checkInterval(response: store.balanceResponse.response) {
+                completion(.cached)
+            } else {
+                poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+                    
+                    guard let dictionary = json as? [String: String] else {
+                        completion(.error)
+                        return
+                    }
+                    
+                    let filtered = dictionary.filter {$1 != "0.00000000"}
+                    
+                    var balances: [Currency: Balance] = [:]
+                    filtered.forEach { (arg) in
+                        let (key, value) = arg
+                        let currency = self.userPreference.currencyStore.forCode(key)
+                        balances[currency] = Balance(currency: currency, quantity: NSDecimalNumber(string: value))
+                    }
+                    self.store.balanceResponse = (httpResponse, balances)
+                    completion(.fetched)
+                    }.resume()
+            }
+        }
+        
+        public func returnTradeHistory(currencyPairSymbol: String?, start: Date, end: Date, completion: @escaping (ResponseType) -> Void) {
+            
+            let apiType = Poloniex.PrivateAPI.returnTradeHistory(currencyPairSymbol, start, end)
+            
+            if apiType.checkInterval(response: store.pastTradesResponse.response) {
+                completion(.cached)
+            } else {
+                poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+                    guard let json = json as? [String: [[String: Any]]] else {
+                        print("Error: Cast Failed in \(#function)")
+                        return
+                    }
+                    var trades: [CurrencyPair: [Poloniex.PastTrade]] = [:]
+                    json.forEach { key, value in
+                        let currencyPair = CurrencyPair(poloniexSymbol: key, currencyStore: self.userPreference.currencyStore)
+                        var tradesArray: [Poloniex.PastTrade] = []
+                        value.forEach { tradeJson in
+                            tradesArray.append(Poloniex.PastTrade(json: tradeJson))
+                        }
+                        trades[currencyPair] = tradesArray
+                    }
+                    self.store.pastTradesResponse = (httpResponse, trades)
+                    completion(.fetched)
+                    }.resume()
+            }
+        }
+        
+        public func returnFeeInfo(completion: @escaping (ResponseType) -> Void) {
+            
+            let apiType = Poloniex.PrivateAPI.returnFeeInfo
+            
+            if apiType.checkInterval(response: store.feeInfoResponse.response) {
+                completion(.cached)
+            } else {
+                poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+                    guard let json = json as? [String: Any] else {
+                        completion(.noResponse)
+                        return
+                    }
+                    self.store.feeInfoResponse = (httpResponse, Poloniex.FeeInfo(json: json))
+                    completion(.fetched)
+                    }.resume()
+            }
+        }
+        
+        public func returnDepositsWithdrawals(start: Date, end: Date, completion: @escaping (ResponseType) -> Void) {
+            let apiType = Poloniex.PrivateAPI.returnDepositsWithdrawals(start, end)
+            
+            poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+                
+                guard let json = json as? [String: Any] else {
+                    completion(.noResponse)
+                    return
+                }
+                var deposits: [Poloniex.Deposit] = []
+                if let array = json["deposits"] as? [[String: Any]] {
+                    deposits = array.flatMap { item -> Poloniex.Deposit? in
+                        return Poloniex.Deposit(json: item, currencyStore: self.userPreference.currencyStore)
+                    }
+                }
+                var withdrawals: [Poloniex.Withdrawal] = []
+                if let array = json["withdrawals"] as? [[String: Any]] {
+                    withdrawals = array.flatMap { item -> Poloniex.Withdrawal? in
+                        return Poloniex.Withdrawal(json: item, currencyStore: self.userPreference.currencyStore)
+                    }
+                }
+                
+                self.store.depositsWithdrawalsResponse = (httpResponse, deposits, withdrawals)
+                completion(.fetched)
+                }.resume()
+        }
+        
+        public func returnAvailableAccountBalances() {
+            
+            let apiType = Poloniex.PrivateAPI.returnAvailableAccountBalances
+            
+            poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+                
+                }.resume()
+        }
+        
+        func poloniexDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (json, httpResponse, error) in
+                
+                if let json = json as? [String: String], let error = json["error"] {
+                    
+                    if let startRange = error.range(of: "Nonce must be greater than "), let endRange = error.range(of: ". You provided "), self.isMock == false {
+                        let nonce = Int(error.substring(with: startRange.upperBound..<endRange.lowerBound))
+                        print("Setting nonce \(nonce) from api error")
+                    }
+                    print("Poloniex error: %@", error)
+                }
+                completion?(json, httpResponse, error)
+            }
+        }
+        
+        public override func requestFor(api: APIType) -> NSMutableURLRequest {
+            let mutableURLRequest = api.mutableRequest
+            
+            if api.authenticated {
+                
+                var postDataDictionary = api.postData
+                postDataDictionary["nonce"] = "\(getTimestampInSeconds())"
+                
+                var postDataString = postDataDictionary.queryString
+                
+                if HttpMethod.POST == api.httpMethod {
+                    mutableURLRequest.httpBody = postDataString.utf8Data()
+                }
+                api.print("Request Data: \(postDataString)", content: .response)
+                
+                do {
+                    let hmac_sha = try HMAC(key: secret, variant: .sha512).authenticate(Array(postDataString.utf8))
+                    mutableURLRequest.setValue(hmac_sha.toHexString(), forHTTPHeaderField: "Sign")
+                } catch {
+                    print(error)
+                }
+                
+                mutableURLRequest.setValue(key, forHTTPHeaderField: "Key")
+            }
+            
+            return mutableURLRequest
+        }
+    }
+    
+    public enum PublicAPI {
+        case returnTicker
+        case return24Volume
+        case returnOrderBook(CurrencyPair)
+        case returnCurrencies
+        case returnLoanOrders(Currency)
+    }
+    
+    public enum PrivateAPI {
+        case returnBalances
+        case returnCompleteBalances
+        case returnDepositAddresses
+        case generateNewAddress
+        case returnDepositsWithdrawals(Date, Date)
+        case returnOpenOrders
+        case returnTradeHistory(String?, Date, Date) // CurrencyPair or all
+        case returnOrderTrades
+        case buy
+        case sell
+        case cancelOrder
+        case moveOrder
+        case withdraw
+        case returnFeeInfo
+        case returnAvailableAccountBalances
+        case returnTradableBalances
+        case transferBalance
+        case returnMarginAccountSummary
+        case marginBuy
+        case marginSell
+        case getMarginPosition
+        case closeMarginPosition
+        case createLoanOffer
+        case cancelLoanOffer
+        case returnOpenLoanOffers
+        case returnActiveLoans
+        case returnLendingHistory
+        case toggleAutoRenew
+    }
 }
+
+extension Poloniex.PublicAPI: APIType {
+    
+    public var host: String {
+        return "https://poloniex.com"
+    }
+    
+    public var path: String {
+        switch self {
+        case .returnTicker:
+            return "/public?command=returnTicker"
+        case .return24Volume:
+            return "/public?command=return24hVolume"
+        case .returnOrderBook(let currencyPair):
+            return "/public?command=returnOrderBook&currencyPair=\(currencyPair.poloniexSymbol)&depth=10"
+        case .returnCurrencies:
+            return "/public?command=returnCurrencies"
+        case .returnLoanOrders(let currency):
+            return "/public?command=returnLoanOrders&currency=\(currency.code)"
+        }
+    }
+    
+    public var httpMethod: HttpMethod {
+        return .GET
+    }
+    
+    public var authenticated: Bool {
+        return false
+    }
+    
+    public var loggingEnabled: LogLevel {
+        switch self {
+        case .returnTicker:                 return .url
+        case .return24Volume:               return .url
+        case .returnOrderBook(_):           return .url
+        case .returnCurrencies:             return .url
+        case .returnLoanOrders(_):          return .url
+        }
+    }
+    
+    public var postData: [String: String] {
+        return [:]
+    }
+    
+    public var refetchInterval: TimeInterval {
+        return .aMinute
+    }
+}
+
+extension Poloniex.PrivateAPI: APIType {
+    
+    public var host: String {
+        return "https://poloniex.com"
+    }
+    
+    public var path: String {
+        return "/tradingApi"
+    }
+    
+    public var httpMethod: HttpMethod {
+        return .POST
+    }
+    
+    public var authenticated: Bool {
+        return true
+    }
+    
+    public var loggingEnabled: LogLevel {
+        switch self {
+        case .returnBalances: return .url
+        case .returnCompleteBalances: return .url
+        case .returnDepositAddresses: return .url
+        case .generateNewAddress: return .url
+        case .returnDepositsWithdrawals(_, _): return .url
+        case .returnOpenOrders: return .url
+        case .returnTradeHistory(_, _, _): return .url
+        case .returnOrderTrades: return .url
+        case .buy: return .url
+        case .sell: return .url
+        case .cancelOrder: return .url
+        case .moveOrder: return .url
+        case .withdraw: return .url
+        case .returnFeeInfo: return .url
+        case .returnAvailableAccountBalances: return .url
+        case .returnTradableBalances: return .url
+        case .transferBalance: return .url
+        case .returnMarginAccountSummary: return .url
+        case .marginBuy: return .url
+        case .marginSell: return .url
+        case .getMarginPosition: return .url
+        case .closeMarginPosition: return .url
+        case .createLoanOffer: return .url
+        case .cancelLoanOffer: return .url
+        case .returnOpenLoanOffers: return .url
+        case .returnActiveLoans: return .url
+        case .returnLendingHistory: return .url
+        case .toggleAutoRenew: return .url
+        }
+    }
+    
+    public var postData: [String: String] {
+        switch self {
+        case .returnBalances: return ["command": "returnBalances"]
+        case .returnCompleteBalances: return ["command": "returnCompleteBalances"]
+        case .returnDepositAddresses: return ["command": "returnDepositAddresses"]
+        case .generateNewAddress: return ["command": "generateNewAddress"]
+        case .returnDepositsWithdrawals(let start, let end):
+            return ["command": "returnDepositsWithdrawals", "start": "\(start.timeIntervalSince1970)", "end": "\(end.timeIntervalSince1970)"]
+        case .returnOpenOrders: return ["command": "returnOpenOrders"]
+        case .returnTradeHistory(let currencyPair, let start, let end):
+            var data = ["command": "returnTradeHistory"]
+            if let currencyPair = currencyPair {
+                data["currencyPair"] = currencyPair
+            } else {
+                data["currencyPair"] = "all"
+            }
+            data["start"] = "\(start.timeIntervalSince1970)"
+            data["end"] = "\(end.timeIntervalSince1970)"
+            return data
+        case .returnOrderTrades: return ["command": "returnOrderTrades"]
+        case .buy: return ["command": "buy"]
+        case .sell: return ["command": "sell"]
+        case .cancelOrder: return ["command": "cancelOrder"]
+        case .moveOrder: return ["command": "moveOrder"]
+        case .withdraw: return ["command": "withdraw"]
+        case .returnFeeInfo: return ["command": "returnFeeInfo"]
+        case .returnAvailableAccountBalances: return ["command": "returnAvailableAccountBalances"]
+        case .returnTradableBalances: return ["command": "returnTradableBalances"]
+        case .transferBalance: return ["command": "transferBalance"]
+        case .returnMarginAccountSummary: return ["command": "returnMarginAccountSummary"]
+        case .marginBuy: return ["command": "marginBuy"]
+        case .marginSell: return ["command": "marginSell"]
+        case .getMarginPosition: return ["command": "getMarginPosition"]
+        case .closeMarginPosition: return ["command": "closeMarginPosition"]
+        case .createLoanOffer: return ["command": "createLoanOffer"]
+        case .cancelLoanOffer: return ["command": "cancelLoanOffer"]
+        case .returnOpenLoanOffers: return ["command": "returnOpenLoanOffers"]
+        case .returnActiveLoans: return ["command": "returnActiveLoans"]
+        case .returnLendingHistory: return ["command": "returnLendingHistory"]
+        case .toggleAutoRenew: return ["command": "toggleAutoRenew"]
+        }
+    }
+    
+    public var refetchInterval: TimeInterval {
+        return .aMinute
+    }
+}
+
+public extension Poloniex.Service {
+    
+    func getAccountBalances(completion: @escaping (ResponseType) -> Void, captcha: ((String) -> Void)?) {
+        
+        
+        returnTicker(completion: { _, captchaString in
+            if let captchaString = captchaString {
+                captcha?(captchaString)
+            } else {
+                self.returnBalances(completion: { responseType in
+                    completion(responseType)
+                })
+            }
+        })
+    }
+    
+    func returnTradeHistory(start: Date, end: Date, completion: @escaping (ResponseType) -> Void, captcha: ((String) -> Void)?) {
+        returnTicker(completion: { _, captchaString in
+            if let captchaString = captchaString {
+                captcha?(captchaString)
+            } else {
+                self.returnTradeHistory(currencyPairSymbol: nil, start: start, end: end, completion: completion)
+            }
+        })
+    }
+}
+
+
