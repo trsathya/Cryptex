@@ -34,28 +34,28 @@
 
 import Foundation
 
-class MockURLSession: URLSession {
+public class MockURLSession: URLSession {
     private static let sharedInstance = MockURLSession()
     
-    typealias CompletionBlock = (Data?, URLResponse?, Error?) -> Void
+    public typealias CompletionBlock = (Data?, URLResponse?, Error?) -> Void
     typealias Response = (data: Data?, response: URLResponse?, error: Error?)
     
     private var responses: [URL: Response] = [:]
     
-    override class var shared: URLSession {
+    public override class var shared: URLSession {
         get {
             return MockURLSession.sharedInstance
         }
     }
     
-    override func dataTask(with url: URL, completionHandler: @escaping CompletionBlock) -> URLSessionDataTask {
+    public override func dataTask(with url: URL, completionHandler: @escaping CompletionBlock) -> URLSessionDataTask {
         
         let response = responses[url] ?? (data: nil, response: nil, error: NSError(domain: "MockURLSession", code: 1, userInfo: [NSLocalizedDescriptionKey : "No response registered for (\(url.absoluteString))"]))
         
         return MockURLSessionDataTask(responseParameters: response, completionBlock: completionHandler)
     }
     
-    override func dataTask(with urlRequest: URLRequest, completionHandler: @escaping CompletionBlock) -> URLSessionDataTask {
+    public override func dataTask(with urlRequest: URLRequest, completionHandler: @escaping CompletionBlock) -> URLSessionDataTask {
         
         if let url = urlRequest.url {
             let response = responses[url] ?? (data: nil, response: nil, error: NSError(domain: "MockURLSession", code: 1, userInfo: [NSLocalizedDescriptionKey : "No response registered for (\(url.absoluteString))"]))
@@ -67,7 +67,7 @@ class MockURLSession: URLSession {
         }
     }
     
-    func registerMockResponse(url: URL, data: Data?, statusCode: Int = 200, headerFields: [String: String]? = nil, error: Error? = nil) {
+    public func registerMockResponse(url: URL, data: Data?, statusCode: Int = 200, headerFields: [String: String]? = nil, error: Error? = nil) {
         
         responses[url] = (data: data, response: HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headerFields), error: error)
     }
