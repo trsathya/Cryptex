@@ -8,25 +8,17 @@
 
 import Foundation
 
-public struct Currency: Hashable, Comparable {
+public class Currency: Hashable, Comparable {
     public let name: String
     public let code: String
-    public let type: Category
     
-    public init(name: String, code: String, type: Category) {
+    public init(name: String, code: String) {
         self.name = name
         self.code = code
-        self.type = type
     }
-    
-    public init(code: String) {
-        self.init(name: code, code: code, type: .notDetermined)
-    }
-    
+
     public var hashValue: Int {
-        get {
-            return code.hashValue
-        }
+        return code.hashValue
     }
     
     public static func <(lhs: Currency, rhs: Currency) -> Bool {
@@ -40,10 +32,30 @@ public struct Currency: Hashable, Comparable {
     public static func ==(lhs: Currency, rhs: Currency) -> Bool {
         return lhs.code.lowercased() == rhs.code.lowercased()
     }
+}
+
+public extension Currency {
     
-    public enum Category {
-        case notDetermined
-        case fiat
-        case crypto
+    public convenience init(code: String) {
+        self.init(name: code, code: code)
     }
+    
+    static let USD = Currency(name: "US Dollar", code: "USD")
+    static let Bitcoin = Currency(name: "Bitcoin", code: "BTC")
+    static let Ethereum = Currency(name: "Ethereum", code: "ETH")
+    static let Litecoin = Currency(name: "Litecoin", code: "LTC")
+    static let Ripple = Currency(name: "Ripple", code: "XRP")
+    static let Cardano = Currency(name: "Cardano", code: "ADA")
+    static let NEM = Currency(name: "NEM", code: "XEM")
+    static let USDT = Currency(name: "Tether USD", code: "USDT")
+    static let currencies: [Currency] = [
+        USD,
+        Bitcoin,
+        Ethereum,
+        Ripple,
+        Litecoin,
+        Cardano,
+        NEM,
+        USDT
+        ]
 }

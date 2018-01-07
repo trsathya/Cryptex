@@ -37,3 +37,9 @@ public enum TransactionType: String {
     case withdraw
     case deposit
 }
+
+public enum TickerViewType: Int {
+    case quantity = 0
+    case price = 1
+    case name = 2
+}

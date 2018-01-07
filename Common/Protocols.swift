@@ -8,10 +8,8 @@
 import Foundation
 
 public protocol CurrencyStoreType {
-    static func isKnown(code: String) -> Bool
-    static func forCode(_ code: String) -> Currency
+    func isKnown(code: String) -> Bool
+    func forCode(_ code: String) -> Currency
 }
 
-public protocol ExchangeDataStoreType {
-    var name: String { get }
-}
+

@@ -12,7 +12,7 @@ public protocol BalanceType {
     var quantity: NSDecimalNumber { get }
 }
 
-public struct Balance: BalanceType {
+public class Balance: BalanceType {
     public let currency: Currency
     public let quantity: NSDecimalNumber
     

@@ -17,7 +17,7 @@ public extension CurrencyPair {
         }
     }
     
-    public init(poloniexSymbol: String, currencyStore: CurrencyStoreType.Type) {
+    public convenience init(poloniexSymbol: String, currencyStore: CurrencyStoreType) {
         let currencySymbols = poloniexSymbol.components(separatedBy: "_")
         let quantity = currencyStore.forCode(currencySymbols[1])
         let price = currencyStore.forCode(currencySymbols[0])
@@ -26,13 +26,11 @@ public extension CurrencyPair {
 }
 
 public struct Poloniex {
-    public struct Ticker: Comparable {
-        public let symbol: CurrencyPair
+    public class Ticker: Cryptex.Ticker {
         public let timestamp: Date
         
         public var id: Int?
         public var last = NSDecimalNumber.zero
-        public var lastInUSD = NSDecimalNumber.zero
         public var highestBid = NSDecimalNumber.zero
         public var lowestAsk = NSDecimalNumber.zero
         public var high24hr = NSDecimalNumber.zero
@@ -43,31 +41,31 @@ public struct Poloniex {
         public var isFrozen: Bool?
         
         public init?(json: Any?, symbol: CurrencyPair, timestamp: Date) {
-            self.symbol = symbol
             self.timestamp = timestamp
             guard let json = json as? [String: Any] else { return nil }
             id = json["id"] as? Int
-            last = NSDecimalNumber(any: json["last"])
-            highestBid = NSDecimalNumber(any: json["highestBid"])
-            lowestAsk = NSDecimalNumber(any: json["lowestAsk"])
-            high24hr = NSDecimalNumber(any: json["high24hr"])
-            low24hr = NSDecimalNumber(any: json["low24hr"])
-            percentChange = NSDecimalNumber(any: json["percentChange"])
-            quoteVolume = NSDecimalNumber(any: json["quoteVolume"])
-            baseVolume = NSDecimalNumber(any: json["baseVolume"])
+            last = NSDecimalNumber(json["last"])
+            super.init(symbol: symbol, price: last)
+            highestBid = NSDecimalNumber(json["highestBid"])
+            lowestAsk = NSDecimalNumber(json["lowestAsk"])
+            high24hr = NSDecimalNumber(json["high24hr"])
+            low24hr = NSDecimalNumber(json["low24hr"])
+            percentChange = NSDecimalNumber(json["percentChange"])
+            quoteVolume = NSDecimalNumber(json["quoteVolume"])
+            baseVolume = NSDecimalNumber(json["baseVolume"])
             isFrozen = json["isFrozen"] as? Bool
         }
         
         public static func <(lhs: Ticker, rhs: Ticker) -> Bool {
-            return lhs.lastInUSD.compare(rhs.lastInUSD) == .orderedAscending
+            return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedAscending
         }
         
         public static func >(lhs: Ticker, rhs: Ticker) -> Bool {
-            return lhs.lastInUSD.compare(rhs.lastInUSD) == .orderedDescending
+            return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedDescending
         }
         
         public static func ==(lhs: Ticker, rhs: Ticker) -> Bool {
-            return lhs.lastInUSD.compare(rhs.lastInUSD) == .orderedSame
+            return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedSame
         }
     }
     
@@ -91,10 +89,10 @@ public struct Poloniex {
             if let string = json["date"] as? String, let value = df.date(from: string) {
                 date = value
             }
-            rate = NSDecimalNumber(any: json["rate"])
-            amount = NSDecimalNumber(any: json["amount"])
-            total = NSDecimalNumber(any: json["total"])
-            fee = NSDecimalNumber(any: json["fee"])
+            rate = NSDecimalNumber(json["rate"])
+            amount = NSDecimalNumber(json["amount"])
+            total = NSDecimalNumber(json["total"])
+            fee = NSDecimalNumber(json["fee"])
             orderNumber = json["orderNumber"] as! String
             if let string = json["type"] as? String, let value = TransactionType(rawValue: string.lowercased()) {
                 type = value
@@ -110,10 +108,10 @@ public struct Poloniex {
         public var nextTier: NSDecimalNumber
         
         public init(json: [String: Any]) {
-            makerFee = NSDecimalNumber(any: json["makerFee"])
-            takerFee = NSDecimalNumber(any: json["takerFee"])
-            thirtyDayVolume = NSDecimalNumber(any: json["thirtyDayVolume"])
-            nextTier = NSDecimalNumber(any: json["nextTier"])
+            makerFee = NSDecimalNumber(json["makerFee"])
+            takerFee = NSDecimalNumber(json["takerFee"])
+            thirtyDayVolume = NSDecimalNumber(json["thirtyDayVolume"])
+            nextTier = NSDecimalNumber(json["nextTier"])
         }
     }
     
@@ -126,10 +124,10 @@ public struct Poloniex {
         public var timestamp: Date
         public var status: String
         
-        public init(json: [String: Any], currencyStore: CurrencyStoreType.Type) {
+        public init(json: [String: Any], currencyStore: CurrencyStoreType) {
             currency = currencyStore.forCode(json["currency"] as? String ?? "")
             address = json["address"] as? String ?? ""
-            amount = NSDecimalNumber(any: json["amount"])
+            amount = NSDecimalNumber(json["amount"])
             confirmations = json["confirmations"] as? Int ?? 0
             txid = json["txid"] as? String ?? ""
             timestamp = Date(timeIntervalSince1970: json["timestamp"] as? TimeInterval ?? 0)
@@ -146,31 +144,30 @@ public struct Poloniex {
         public var status: String
         public var ipAddress: String
         
-        public init(json: [String: Any], currencyStore: CurrencyStoreType.Type) {
+        public init(json: [String: Any], currencyStore: CurrencyStoreType) {
             withdrawalNumber = json["withdrawalNumber"] as? Int ?? 0
             currency = currencyStore.forCode(json["currency"] as? String ?? "")
             address = json["address"] as? String ?? ""
-            amount = NSDecimalNumber(any: json["amount"])
+            amount = NSDecimalNumber(json["amount"])
             timestamp = Date(timeIntervalSince1970: json["timestamp"] as? TimeInterval ?? 0)
             status = json["status"] as? String ?? ""
             ipAddress = json["ipAddress"] as? String ?? ""
         }
     }
     
-    public class Store: ExchangeDataStoreType {
+    public class Store: ExchangeDataStore<Poloniex.Ticker, Balance> {
         public static var shared = Store()
         
-        public var name: String = "Poloniex"
-        
-        private init() { }
+        override private init() {
+            super.init()
+            name = "Poloniex"
+            accountingCurrency = .USDT
+        }
         
         public var tickerResponse: HTTPURLResponse? = nil
-        public var poloniexTickerByQuantityCCY: [[Poloniex.Ticker]] = []
-        public var poloniexTickerByPriceCCY: [[Poloniex.Ticker]] = []
-        public var poloniexTickerByName: [[Poloniex.Ticker]] = []
-        public var balanceResponse: (response: HTTPURLResponse?, balances: [Currency: Balance]) = (nil, [:])
+        public var balanceResponse: HTTPURLResponse? = nil
         public var feeInfoResponse: (response: HTTPURLResponse?, feeInfo: Poloniex.FeeInfo?) = (nil, nil)
-        public var pastTradesResponse: (response: HTTPURLResponse?, pastTrades: [CurrencyPair: [Poloniex.PastTrade]]) = (nil, [:])
+        public var pastTradesResponse: (response: HTTPURLResponse?, pastTrades: [String: [Poloniex.PastTrade]]) = (nil, [:])
         public var depositsWithdrawalsResponse: (response: HTTPURLResponse?, deposits: [Poloniex.Deposit], withdrawals: [Poloniex.Withdrawal]) = (nil, [], [])
     }
     
@@ -185,36 +182,7 @@ public struct Poloniex {
             self.secret = secret
             super.init(session: session, userPreference: userPreference)
         }
-        
-        public func balanceInPreferredCurrency(balance: BalanceType) -> NSDecimalNumber {
-            
-            let fiatCurrencyPair = CurrencyPair(quantity: balance.currency, price: userPreference.fiat)
-            let cryptoCurrencyPair = CurrencyPair(quantity: balance.currency, price: userPreference.crypto)
-            
-            if let tickerByName = store.poloniexTickerByName.first {
-                if let ticker = (tickerByName.filter {$0.symbol == fiatCurrencyPair}).first {
-                    return balance.quantity.multiplying(by: ticker.lastInUSD)
-                } else if let ticker = (tickerByName.filter {$0.symbol == cryptoCurrencyPair}).first {
-                    return balance.quantity.multiplying(by: ticker.lastInUSD)
-                } else {
-                    return balance.quantity
-                }
-            } else {
-                return balance.quantity
-            }
-        }
-        
-        public func getTotalBalance() -> NSDecimalNumber {
-            var totalBalance = NSDecimalNumber.zero
-            store.balanceResponse.balances.keys.forEach { currency in
-                if let balance = store.balanceResponse.balances[currency] {
-                    let balanceInPreferredCurrency = self.balanceInPreferredCurrency(balance: balance)
-                    totalBalance = totalBalance.adding(balanceInPreferredCurrency)
-                }
-            }
-            return totalBalance
-        }
-        
+                
         public func returnTicker(completion: @escaping (ResponseType, String?) -> Void) {
             
             let apiType = Poloniex.PublicAPI.returnTicker
@@ -235,46 +203,8 @@ public struct Poloniex {
                         date = parsedDate
                     }
                     var tickers = json.flatMap { Poloniex.Ticker(json: $0.value, symbol: CurrencyPair(poloniexSymbol: $0.key, currencyStore: self.userPreference.currencyStore), timestamp: date) }
+                    self.store.setTickersInDictionary(tickers: tickers)
                     
-                    tickers = tickers.map({ (ticker) -> Poloniex.Ticker in
-                        if ticker.symbol.price == self.userPreference.fiat {
-                            var t = ticker
-                            t.lastInUSD = ticker.last
-                            return t
-                        } else if let usdPrice = tickers.filter({ (innerTicker) -> Bool in
-                            return ticker.symbol.price == innerTicker.symbol.quantity && innerTicker.symbol.price == self.userPreference.fiat
-                        }).first?.last {
-                            var t = ticker
-                            t.lastInUSD = usdPrice.multiplying(by: ticker.last)
-                            return t
-                        }
-                        return ticker
-                    })
-                    
-                    var byQuantityCCY: [Currency: [Poloniex.Ticker]] = [:]
-                    var byPriceCCY: [Currency: [Poloniex.Ticker]] = [:]
-                    
-                    Set(tickers.map { $0.symbol.quantity }).forEach { quantity in
-                        byQuantityCCY[quantity] = []
-                    }
-                    
-                    Set(tickers.map { $0.symbol.price }).forEach { price in
-                        byPriceCCY[price] = []
-                    }
-                    
-                    tickers.forEach { ticker in
-                        byQuantityCCY[ticker.symbol.quantity]?.append(ticker)
-                        byPriceCCY[ticker.symbol.price]?.append(ticker)
-                    }
-                    
-                    
-                    self.store.poloniexTickerByQuantityCCY = byQuantityCCY.values.sorted(by: { (leftArray, rightArray) -> Bool in
-                        guard let left = leftArray.first, let right = rightArray.first else { return false }
-                        return left.lastInUSD.compare(right.lastInUSD) == .orderedDescending
-                    })
-                    self.store.poloniexTickerByPriceCCY = byPriceCCY.keys.flatMap { byPriceCCY[$0] }
-                    
-                    self.store.poloniexTickerByName = [tickers]
                     self.store.tickerResponse = httpResponse
                     completion(.fetched, nil)
                     }.resume()
@@ -285,7 +215,7 @@ public struct Poloniex {
             
             let apiType = Poloniex.PrivateAPI.returnBalances
             
-            if apiType.checkInterval(response: store.balanceResponse.response) {
+            if apiType.checkInterval(response: store.balanceResponse) {
                 completion(.cached)
             } else {
                 poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
@@ -297,13 +227,13 @@ public struct Poloniex {
                     
                     let filtered = dictionary.filter {$1 != "0.00000000"}
                     
-                    var balances: [Currency: Balance] = [:]
+                    var balances: [Balance] = []
                     filtered.forEach { (arg) in
                         let (key, value) = arg
-                        let currency = self.userPreference.currencyStore.forCode(key)
-                        balances[currency] = Balance(currency: currency, quantity: NSDecimalNumber(string: value))
+                        balances.append(Balance(currency: self.userPreference.currencyStore.forCode(key), quantity: NSDecimalNumber(string: value)))
                     }
-                    self.store.balanceResponse = (httpResponse, balances)
+                    self.store.balances = balances
+                    self.store.balanceResponse = httpResponse
                     completion(.fetched)
                     }.resume()
             }
@@ -321,14 +251,14 @@ public struct Poloniex {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
-                    var trades: [CurrencyPair: [Poloniex.PastTrade]] = [:]
+                    var trades: [String: [Poloniex.PastTrade]] = [:]
                     json.forEach { key, value in
                         let currencyPair = CurrencyPair(poloniexSymbol: key, currencyStore: self.userPreference.currencyStore)
                         var tradesArray: [Poloniex.PastTrade] = []
                         value.forEach { tradeJson in
                             tradesArray.append(Poloniex.PastTrade(json: tradeJson))
                         }
-                        trades[currencyPair] = tradesArray
+                        trades[currencyPair.displaySymbol] = tradesArray
                     }
                     self.store.pastTradesResponse = (httpResponse, trades)
                     completion(.fetched)

@@ -44,7 +44,7 @@ open class Network {
                 return
             }
             
-            guard let responseDataString = String(data: data, encoding: .utf8) else { return }
+            guard let responseDataString = data.string else { return }
             
             guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
                 print("Data is not a json for request: \(urlRequest.url?.absoluteString)")

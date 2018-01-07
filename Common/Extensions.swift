@@ -7,10 +7,6 @@
 
 import Foundation
 
-public func data(_ any: Any) -> Data? {
-    return try? JSONSerialization.data(withJSONObject: any, options: [])
-}
-
 public extension Locale {
     static let enUS = Locale(identifier: "en-US")
 }
@@ -65,8 +61,14 @@ public extension DateFormatter {
 }
 
 public extension NSDecimalNumber {
-    convenience init(any: Any?) {
-        self.init(string: any as? String)
+    convenience init(_ any: Any?) {
+        if let string = any as? String {
+            self.init(string: string)
+        } else if let number = (any as? NSNumber)?.decimalValue {
+            self.init(decimal: number)
+        } else {
+            self.init(value: 0)
+        }
     }
 
     static var thousand: NSDecimalNumber {
@@ -121,6 +123,18 @@ public extension Dictionary where Key: ExpressibleByStringLiteral, Value: Expres
             postDataString += "\(tuple.key)=\(tuple.value)"
         }
         return postDataString
+    }
+}
+
+extension Data {
+    var string: String? {
+        return String(data: self, encoding: .utf8)
+    }
+}
+
+public extension Dictionary {
+    var data: Data? {
+        return try? JSONSerialization.data(withJSONObject: self, options: [])
     }
 }
 

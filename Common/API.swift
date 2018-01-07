@@ -31,8 +31,8 @@ public extension APIType {
         return true
     }
     
-    func print(_ any: Any, content: LogLevel) {
-        guard content.rawValue <= loggingEnabled.rawValue else { return }
+    func print(_ any: Any?, content: LogLevel) {
+        guard let any = any, content.rawValue <= loggingEnabled.rawValue else { return }
         Swift.print(any)
     }
 }

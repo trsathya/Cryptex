@@ -10,7 +10,7 @@ import Foundation
 import CryptoSwift
 
 public struct Gemini {
-    public struct Ticker {
+    public class Ticker: Cryptex.Ticker {
         public var bid: NSDecimalNumber
         public var ask: NSDecimalNumber
         public var last: NSDecimalNumber
@@ -19,9 +19,10 @@ public struct Gemini {
         public init?(json: Any?, for symbol: CurrencyPair) {
             guard let json = json as? [String: Any] else { return nil }
             
-            bid = NSDecimalNumber(any: json["bid"])
-            ask = NSDecimalNumber(any: json["ask"])
-            last = NSDecimalNumber(any: json["last"])
+            bid = NSDecimalNumber(json["bid"])
+            ask = NSDecimalNumber(json["ask"])
+            last = NSDecimalNumber(json["last"])
+            super.init(symbol: symbol, price: last)
             volume = Volume(json: json["volume"], for: symbol)
         }
         
@@ -79,20 +80,17 @@ public struct Gemini {
         }
     }
     
-    public struct Balance: BalanceType {
-        public var currency: Currency
-        public var quantity: NSDecimalNumber
+    public class Balance: Cryptex.Balance {
         public var availableForTrading: NSDecimalNumber
         public var availableForWithdrawal: NSDecimalNumber
         public var type: String
         
-        public init?(json: Any?, currencyStore: CurrencyStoreType.Type) {
+        public init?(json: Any?, currencyStore: CurrencyStoreType) {
             guard let json = json as? [String: Any] else { return nil }
-            quantity = NSDecimalNumber(any: json["amount"])
-            availableForTrading = NSDecimalNumber(any: json["available"])
-            availableForWithdrawal = NSDecimalNumber(any: json["availableForWithdrawal"])
-            currency = currencyStore.forCode(json["currency"] as! String)
+            availableForTrading = NSDecimalNumber(json["available"])
+            availableForWithdrawal = NSDecimalNumber(json["availableForWithdrawal"])
             type = json["type"] as! String
+            super.init(currency: currencyStore.forCode(json["currency"] as! String), quantity: NSDecimalNumber(json["amount"]))
         }
     }
     
@@ -109,16 +107,16 @@ public struct Gemini {
         public var exchange: String
         public var isAuctionFill: Bool
         
-        public init?(json: [String: Any], currencyStore: CurrencyStoreType.Type) {
-            price = NSDecimalNumber(any: json["price"])
-            amount = NSDecimalNumber(any: json["amount"])
+        public init?(json: [String: Any], currencyStore: CurrencyStoreType) {
+            price = NSDecimalNumber(json["price"])
+            amount = NSDecimalNumber(json["amount"])
             timestamp = Date(timeIntervalSince1970: (json["timestampms"] as! TimeInterval)/1000)
             if let string = json["type"] as? String, let value = TransactionType(rawValue: string.lowercased()) {
                 type = value
             }
             aggressor = json["aggressor"] as! Bool
             feeCurrency = currencyStore.forCode(json["fee_currency"] as! String)
-            feeAmount = NSDecimalNumber(any: json["fee_amount"])
+            feeAmount = NSDecimalNumber(json["fee_amount"])
             tid = json["tid"] as! UInt32
             orderId = json["order_id"] as! String
             exchange = json["exchange"] as! String
@@ -126,17 +124,18 @@ public struct Gemini {
         }
     }
     
-    public class Store: ExchangeDataStoreType {
+    public class Store: ExchangeDataStore<Ticker, Balance> {
         public static var shared = Store()
         
-        public var name: String = "Gemini"
-        
-        private init() { }
+        override private init() {
+            super.init()
+            name = "Gemini"
+        }
         
         public var symbolsResponse: (response: HTTPURLResponse?, symbols: [CurrencyPair]) = (nil, [])
-        public var tickerResponse: [CurrencyPair: (response: HTTPURLResponse?, ticker: Gemini.Ticker)] = [:]
-        public var balanceResponse: (response: HTTPURLResponse?, balances: [Gemini.Balance]) = (nil, [])
-        public var pastTradesResponse: [CurrencyPair: (response: HTTPURLResponse?, pastTrades: [Gemini.PastTrade])] = [:]
+        public var tickerResponse: [String: HTTPURLResponse] = [:]
+        public var balanceResponse: HTTPURLResponse? = nil
+        public var pastTradesResponse: [String: (response: HTTPURLResponse?, pastTrades: [Gemini.PastTrade])] = [:]
         public var currentOrderBookResponse: (response: HTTPURLResponse?, currentorderBook: Gemini.CurrentOrderBook?) = (nil, nil)
     }
     
@@ -177,30 +176,7 @@ public struct Gemini {
             self.secret = secret
             super.init(session: session, userPreference: userPreference)
         }
-        
-        public func balanceInPreferredCurrency(balance: BalanceType) -> NSDecimalNumber {
-            
-            let fiatCurrencyPair = CurrencyPair(quantity: balance.currency, price: userPreference.fiat)
-            let cryptoCurrencyPair = CurrencyPair(quantity: balance.currency, price: userPreference.crypto)
-            
-            if let ticker = store.tickerResponse[fiatCurrencyPair]?.ticker {
-                return balance.quantity.multiplying(by: ticker.last)
-            } else if let ticker = store.tickerResponse[cryptoCurrencyPair]?.ticker {
-                return balance.quantity.multiplying(by: ticker.last)
-            } else {
-                return balance.quantity
-            }
-        }
-        
-        public func getTotalBalance() -> NSDecimalNumber {
-            var totalBalance = NSDecimalNumber.zero
-            store.balanceResponse.balances.forEach({ (balance) in
-                let balanceInPreferredCurrency = self.balanceInPreferredCurrency(balance: balance)
-                totalBalance = totalBalance.adding(balanceInPreferredCurrency)
-            })
-            return totalBalance
-        }
-        
+                
         public func getSymbols(completion: @escaping (ResponseType) -> Void) {
             let apiType = Gemini.API.symbols
             if apiType.checkInterval(response: store.symbolsResponse.response) {
@@ -219,8 +195,8 @@ public struct Gemini {
         }
         
         public func getTicker(symbol: CurrencyPair, completion: @escaping (CurrencyPair, ResponseType) -> Void) {
-            let apiType = Gemini.API.ticker(symbol.displayName)
-            if apiType.checkInterval(response: store.tickerResponse[symbol]?.response) {
+            let apiType = Gemini.API.ticker(symbol.displaySymbol)
+            if apiType.checkInterval(response: store.tickerResponse[symbol.displaySymbol]) {
                 completion(symbol, .cached)
             } else {
                 geminiDataTaskFor(api: apiType, completion: { (json, response, error) in
@@ -228,14 +204,16 @@ public struct Gemini {
                         completion(symbol, .noResponse)
                         return
                     }
-                    self.store.tickerResponse[symbol] = (response, ticker)
+                    
+                    self.store.setTicker(ticker: ticker, symbol: symbol.displaySymbol)
+                    self.store.tickerResponse[symbol.displaySymbol] = response
                     completion(symbol, .fetched)
                 }, failure: nil).resume()
             }
         }
         
         public func getCurrentOrderBook(symbol: CurrencyPair, completion: @escaping (ResponseType) -> Void) {
-            let apiType = Gemini.API.currentOrderBook(symbol.displayName)
+            let apiType = Gemini.API.currentOrderBook(symbol.displaySymbol)
             if apiType.checkInterval(response: store.symbolsResponse.response) {
                 completion(.cached)
             } else {
@@ -252,7 +230,7 @@ public struct Gemini {
         
         public func getAvailableBalances(completion: @escaping (ResponseType) -> Void, failure: ((String?, String?) -> Void)?) {
             let apiType = Gemini.API.getAvailableBalances
-            if apiType.checkInterval(response: store.balanceResponse.response) {
+            if apiType.checkInterval(response: store.balanceResponse) {
                 completion(.cached)
             } else {
                 geminiDataTaskFor(api: apiType, completion: { (json, response, error) in
@@ -261,7 +239,9 @@ public struct Gemini {
                         return
                         
                     }
-                    self.store.balanceResponse = (response, array.flatMap {Gemini.Balance(json: $0, currencyStore: self.userPreference.currencyStore)})
+                    let balances = array.flatMap {Gemini.Balance(json: $0, currencyStore: self.userPreference.currencyStore)}
+                    self.store.balances = balances
+                    self.store.balanceResponse = response
                     completion(.fetched)
                 }, failure: failure).resume()
             }
@@ -269,7 +249,7 @@ public struct Gemini {
         
         public func getPastTrades(currencyPair: CurrencyPair, completion: @escaping (CurrencyPair, ResponseType) -> Void, failure: @escaping (String?, String?) -> Void) {
             let apiType = Gemini.API.getPastTrades(currencyPair)
-            if apiType.checkInterval(response: store.pastTradesResponse[currencyPair]?.response) {
+            if apiType.checkInterval(response: store.pastTradesResponse[currencyPair.displaySymbol]?.response) {
                 completion(currencyPair, .cached)
             } else {
                 geminiDataTaskFor(api: apiType, completion: { (json, response, error) in
@@ -278,7 +258,7 @@ public struct Gemini {
                         return
                     }
                     let pastTrades = array.flatMap {Gemini.PastTrade(json: $0, currencyStore: self.userPreference.currencyStore)}
-                    self.store.pastTradesResponse[currencyPair] = (response, pastTrades)
+                    self.store.pastTradesResponse[currencyPair.displaySymbol] = (response, pastTrades)
                     completion(currencyPair, .fetched)
                 }, failure: failure).resume()
             }
@@ -310,7 +290,7 @@ public struct Gemini {
                 postDataDictionary["nonce"] = "\(getTimestampInSeconds())"
                 
                 var base64EncodedPostDataString = ""
-                if let data = data(postDataDictionary) {
+                if let data = postDataDictionary.data {
                     base64EncodedPostDataString = data.base64EncodedString()
                 }
                 
@@ -444,7 +424,7 @@ extension Gemini.API: APIType {
         case .cancelAllActiveOrders: return ["request": path]
         case .orderStatus:          return ["request": path]
         case .getActiveOrders:      return ["request": path]
-        case .getPastTrades(let currencyPair): return ["request": path, "symbol": currencyPair.displayName]
+        case .getPastTrades(let currencyPair): return ["request": path, "symbol": currencyPair.displaySymbol]
         case .getTradeVolume:       return ["request": path]
         case .getAvailableBalances: return ["request": path]
         case .newDepositAddress(let currency): return ["request": "/v1/deposit/\(currency.code)/newAddress"]
@@ -482,15 +462,15 @@ public extension Gemini.Service {
     func getTickers(completion: @escaping (CurrencyPair, ResponseType) -> Void) {
         getSymbols(completion: { _ in
             
-            var tasks: [CurrencyPair: Bool] = [:]
+            var tasks: [String: Bool] = [:]
             
             self.store.symbolsResponse.symbols.forEach { symbol in
-                tasks[symbol] = false
+                tasks[symbol.displaySymbol] = false
             }
             
             self.store.symbolsResponse.symbols.forEach { symbol in
                 self.getTicker(symbol: symbol, completion: { (currencyPair, responseType) in
-                    tasks[currencyPair] = true
+                    tasks[currencyPair.displaySymbol] = true
                     
                     let flag = tasks.values.reduce(true, { (result, value) -> Bool in
                         return result && value
