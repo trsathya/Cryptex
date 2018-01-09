@@ -98,7 +98,7 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
 
 extension ExchangeDataStore: TickerTableViewDataSource {
     
-    private func ticker(for section: Int, for row: Int, for viewType: TickerViewType) -> T? {
+    private func ticker(section: Int, row: Int, viewType: TickerViewType) -> T? {
         switch viewType {
         case .quantity: return tickerByQuantityCCY[section][row]
         case .price: return tickerByPriceCCY[section][row]
@@ -106,29 +106,29 @@ extension ExchangeDataStore: TickerTableViewDataSource {
         }
     }
     
-    public func sectionCount(for viewType: TickerViewType) -> Int {
+    public func sectionCount(viewType: TickerViewType) -> Int {
         switch viewType {
         case .quantity: return tickerByQuantityCCY.count
         case .price: return tickerByPriceCCY.count
         default: return 0
         }
     }
-    public func rowCount(for section: Int, for viewType: TickerViewType) -> Int {
+    public func rowCount(section: Int, viewType: TickerViewType) -> Int {
         switch viewType {
         case .quantity: return tickerByQuantityCCY[section].count
         case .price: return tickerByPriceCCY[section].count
         default: return 0
         }
     }
-    public func sectionHeaderTitle(for section: Int, for viewType: TickerViewType) -> String? {
+    public func sectionHeaderTitle(section: Int, viewType: TickerViewType) -> String? {
         switch viewType {
         case .quantity: return tickerByQuantityCCY[section][0].symbol.quantity.name
         case .price: return tickerByPriceCCY[section][0].symbol.price.name
         default: return nil
         }
     }
-    public func displayableTicker(forindexPath: IndexPath, for viewType: TickerViewType) -> DisplayableTickerType? {
-        guard let t = ticker(for: forindexPath.section, for: forindexPath.row, for: viewType) else { return nil }
+    public func displayableTicker(section: Int, row: Int, viewType: TickerViewType) -> DisplayableTickerType? {
+        guard let t = ticker(section: section, row: row, viewType: viewType) else { return nil }
         let displayable = DisplayableTicker(name: t.symbol.quantity.name, price: displayablePrice(ticker: t), priceInUSD: t.formattedPriceInUSD)
         return displayable
     }

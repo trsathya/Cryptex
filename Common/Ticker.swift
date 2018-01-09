@@ -64,8 +64,8 @@ public struct DisplayableTicker: DisplayableTickerType {
 }
 
 public protocol TickerTableViewDataSource {
-    func sectionCount(for viewType: TickerViewType) -> Int
-    func rowCount(for section: Int, for viewType: TickerViewType) -> Int
-    func sectionHeaderTitle(for section: Int, for viewType: TickerViewType) -> String?
-    func displayableTicker(forindexPath: IndexPath, for viewType: TickerViewType) -> DisplayableTickerType?
+    func sectionCount(viewType: TickerViewType) -> Int
+    func rowCount(section: Int, viewType: TickerViewType) -> Int
+    func sectionHeaderTitle(section: Int, viewType: TickerViewType) -> String?
+    func displayableTicker(section: Int, row: Int, viewType: TickerViewType) -> DisplayableTickerType?
 }
