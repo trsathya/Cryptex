@@ -13,6 +13,12 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
     public var accountingCurrency = Currency.USD
     public var commonCurrency = Currency.Bitcoin
     
+    public var tickerByQuantityCCY: [[T]] = []
+    public var tickerByPriceCCY: [[T]] = []
+    public var tickerByName: [T] = []
+    
+    public var balances: [U] = []
+    
     public var tickersDictionary: [String: T] = [:] {
         didSet {
             let tickers = tickersDictionary.values.flatMap{$0}
@@ -34,12 +40,7 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
             })
         }
     }
-    public var tickerByQuantityCCY: [[T]] = []
-    public var tickerByPriceCCY: [[T]] = []
-    public var tickerByName: [T] = []
-    
-    public var balances: [U] = []
-    
+
     private func setPriceInUSD(tickers: [T]) -> [T] {
         return tickers.map({ (ticker) -> T in
             if ticker.symbol.price == accountingCurrency {
@@ -70,23 +71,6 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
         tickersDictionary = dictionary
     }
     
-    public func tickers(viewType: TickerViewType) -> [[T]] {
-        switch viewType {
-        case .quantity: return tickerByQuantityCCY
-        case .price: return tickerByPriceCCY
-        default: return [tickerByName]
-        }
-    }
-    
-    public func titleForHeader(viewType: TickerViewType, section: Int) -> String {
-        let currencyPair = tickers(viewType: viewType)[section][0].symbol
-        switch viewType {
-        case .quantity: return currencyPair.quantity.name
-        case .price: return currencyPair.price.name
-        default: return ""
-        }
-    }
-    
     public func balanceInPreferredCurrency(balance: BalanceType) -> NSDecimalNumber {
         
         let fiatCurrencyPair = CurrencyPair(quantity: balance.currency, price: accountingCurrency)
@@ -105,4 +89,48 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
         balances.forEach { totalBalance = totalBalance.adding(balanceInPreferredCurrency(balance: $0)) }
         return totalBalance
     }
+    
+    public func displayablePrice(ticker: T) -> String {
+        guard ticker.symbol.price != accountingCurrency else { return "" }
+        return ticker.price.stringValue + " " + ticker.symbol.price.code
+    }
 }
+
+extension ExchangeDataStore: TickerTableViewDataSource {
+    
+    private func ticker(for section: Int, for row: Int, for viewType: TickerViewType) -> T? {
+        switch viewType {
+        case .quantity: return tickerByQuantityCCY[section][row]
+        case .price: return tickerByPriceCCY[section][row]
+        default: return nil
+        }
+    }
+    
+    public func sectionCount(for viewType: TickerViewType) -> Int {
+        switch viewType {
+        case .quantity: return tickerByQuantityCCY.count
+        case .price: return tickerByPriceCCY.count
+        default: return 0
+        }
+    }
+    public func rowCount(for section: Int, for viewType: TickerViewType) -> Int {
+        switch viewType {
+        case .quantity: return tickerByQuantityCCY[section].count
+        case .price: return tickerByPriceCCY[section].count
+        default: return 0
+        }
+    }
+    public func sectionHeaderTitle(for section: Int, for viewType: TickerViewType) -> String? {
+        switch viewType {
+        case .quantity: return tickerByQuantityCCY[section][0].symbol.quantity.name
+        case .price: return tickerByPriceCCY[section][0].symbol.price.name
+        default: return nil
+        }
+    }
+    public func displayableTicker(forindexPath: IndexPath, for viewType: TickerViewType) -> DisplayableTickerType? {
+        guard let t = ticker(for: forindexPath.section, for: forindexPath.row, for: viewType) else { return nil }
+        let displayable = DisplayableTicker(name: t.symbol.quantity.name, price: displayablePrice(ticker: t), priceInUSD: t.formattedPriceInUSD)
+        return displayable
+    }
+}
+

@@ -22,11 +22,11 @@ public struct UserPreference {
     }
 }
 
-public struct Accounting {
+public struct Accounting<T: TickerType> {
     public var currencies: [Currency]
-    public var tickers: [String: TickerType]
+    public var tickers: [String: T]
     
-    init(currencies: [Currency], tickers: [String: TickerType]) {
+    init(currencies: [Currency], tickers: [String: T]) {
         self.currencies = currencies
         self.tickers = tickers
     }

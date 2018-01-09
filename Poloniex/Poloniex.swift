@@ -171,7 +171,7 @@ public struct Poloniex {
         public var depositsWithdrawalsResponse: (response: HTTPURLResponse?, deposits: [Poloniex.Deposit], withdrawals: [Poloniex.Withdrawal]) = (nil, [], [])
     }
     
-    public class Service: Network {
+    public class Service: Network, ExchangeServiceType {
         
         private let key: String
         private let secret: String
@@ -183,18 +183,14 @@ public struct Poloniex {
             super.init(session: session, userPreference: userPreference)
         }
                 
-        public func returnTicker(completion: @escaping (ResponseType, String?) -> Void) {
+        public func getTickers(completion: @escaping (ResponseType) -> Void) {
             
             let apiType = Poloniex.PublicAPI.returnTicker
             
             if apiType.checkInterval(response: store.tickerResponse) {
-                completion(.cached, nil)
+                completion(.cached)
             } else {
                 poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    
-                    if let json = json as? String {
-                        completion(.fetched, json) // return response string for display on web view.
-                    }
                     
                     guard let json = json as? [String: Any] else { return }
                     
@@ -202,11 +198,11 @@ public struct Poloniex {
                     if let dateString = httpResponse?.allHeaderFields["Date"] as? String, let parsedDate = DateFormatter.httpHeader.date(from: dateString) {
                         date = parsedDate
                     }
-                    var tickers = json.flatMap { Poloniex.Ticker(json: $0.value, symbol: CurrencyPair(poloniexSymbol: $0.key, currencyStore: self.userPreference.currencyStore), timestamp: date) }
+                    let tickers = json.flatMap { Poloniex.Ticker(json: $0.value, symbol: CurrencyPair(poloniexSymbol: $0.key, currencyStore: self.userPreference.currencyStore), timestamp: date) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
                     self.store.tickerResponse = httpResponse
-                    completion(.fetched, nil)
+                    completion(.fetched)
                     }.resume()
             }
         }
@@ -553,29 +549,18 @@ extension Poloniex.PrivateAPI: APIType {
 
 public extension Poloniex.Service {
     
-    func getAccountBalances(completion: @escaping (ResponseType) -> Void, captcha: ((String) -> Void)?) {
+    func getAccountBalances(completion: @escaping (ResponseType) -> Void) {
         
-        
-        returnTicker(completion: { _, captchaString in
-            if let captchaString = captchaString {
-                captcha?(captchaString)
-            } else {
-                self.returnBalances(completion: { responseType in
-                    completion(responseType)
-                })
-            }
+        getTickers(completion: { _ in
+            self.returnBalances(completion: { responseType in
+                completion(responseType)
+            })
         })
     }
     
     func returnTradeHistory(start: Date, end: Date, completion: @escaping (ResponseType) -> Void, captcha: ((String) -> Void)?) {
-        returnTicker(completion: { _, captchaString in
-            if let captchaString = captchaString {
-                captcha?(captchaString)
-            } else {
-                self.returnTradeHistory(currencyPairSymbol: nil, start: start, end: end, completion: completion)
-            }
+        getTickers(completion: { _ in
+            self.returnTradeHistory(currencyPairSymbol: nil, start: start, end: end, completion: completion)
         })
     }
 }
-
-

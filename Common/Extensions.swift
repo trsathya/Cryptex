@@ -7,6 +7,14 @@
 
 import Foundation
 
+public extension Int {
+    public static let thousand = 1_000
+    public static let million = 1_000_000
+    public static let billion = 1_000_000
+    public static let trillion = 1_000_000_000
+}
+
+
 public extension Locale {
     static let enUS = Locale(identifier: "en-US")
 }
@@ -72,12 +80,44 @@ public extension NSDecimalNumber {
     }
 
     static var thousand: NSDecimalNumber {
-        return NSDecimalNumber(value: 1000)
+        return NSDecimalNumber(value: Int.thousand)
+    }
+    
+    static var million: NSDecimalNumber {
+        return NSDecimalNumber(value: Int.million)
+    }
+    
+    static var billion: NSDecimalNumber {
+        return NSDecimalNumber(value: Int.billion)
+    }
+    
+    static var trillion: NSDecimalNumber {
+        return NSDecimalNumber(value: Int.trillion)
     }
     
     var timestampInSeconds: Int64 {
         let handler = NSDecimalNumberHandler(roundingMode: NSDecimalNumber.RoundingMode.down, scale: 0, raiseOnExactness: true, raiseOnOverflow: true, raiseOnUnderflow: true, raiseOnDivideByZero: true)
         return rounding(accordingToBehavior: handler).int64Value
+    }
+    
+    var shortFormatted: String {
+        var temp = self
+        var suffix = ""
+        if intValue >= Int.trillion {
+            temp = temp.dividing(by: .trillion)
+            suffix = "T"
+        } else if intValue >= Int.billion {
+            temp = temp.dividing(by: .billion)
+            suffix = "B"
+        }  else if intValue >= Int.million {
+            temp = temp.dividing(by: .million)
+            suffix = "M"
+        } else if intValue >= Int.thousand {
+            temp = temp.dividing(by: .thousand)
+            suffix = "K"
+        }
+        let num = NumberFormatter.usd.string(from: temp) ?? ""
+        return num + suffix
     }
 }
 

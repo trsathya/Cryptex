@@ -31,7 +31,7 @@ public struct Koinex {
         case ticker
     }
     
-    public class Service: Network {
+    public class Service: Network, ExchangeServiceType {
         
         fileprivate let store = Koinex.Store.shared
         

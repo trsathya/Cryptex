@@ -458,8 +458,8 @@ extension Gemini.API: APIType {
     }
 }
 
-public extension Gemini.Service {
-    func getTickers(completion: @escaping (CurrencyPair, ResponseType) -> Void) {
+extension Gemini.Service: ExchangeServiceType {
+    public func getTickers(completion: @escaping (ResponseType) -> Void) {
         getSymbols(completion: { _ in
             
             var tasks: [String: Bool] = [:]
@@ -476,23 +476,23 @@ public extension Gemini.Service {
                         return result && value
                     })
                     if flag {
-                        completion(currencyPair, responseType)
+                        completion(responseType)
                     }
                 })
             }
         })
     }
     
-    func getAccountBalances(completion: @escaping (ResponseType) -> Void, failure: ((String?, String?) -> Void)?) {
+    public func getAccountBalances(completion: @escaping (ResponseType) -> Void, failure: ((String?, String?) -> Void)?) {
         
-        getTickers(completion: { (_, _) in
+        getTickers(completion: { (_) in
             self.getAvailableBalances(completion: { (responseType) in
                 completion(responseType)
             }, failure: failure)
         })
     }
     
-    func getPastTrades(completion: @escaping (CurrencyPair, ResponseType) -> Void, failure: @escaping (String?, String?) -> Void) {
+    public func getPastTrades(completion: @escaping (CurrencyPair, ResponseType) -> Void, failure: @escaping (String?, String?) -> Void) {
         getSymbols(completion: { _ in
             self.store.symbolsResponse.symbols.forEach { symbol in
                 self.getPastTrades(currencyPair: symbol, completion: completion, failure: failure)

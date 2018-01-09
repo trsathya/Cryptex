@@ -7,6 +7,10 @@
 
 import Foundation
 
+public protocol ExchangeServiceType {
+    func getTickers(completion: @escaping (ResponseType) -> Void)
+}
+
 open class Network {
     
     private let session: URLSession

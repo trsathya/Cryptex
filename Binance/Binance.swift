@@ -51,7 +51,7 @@ public struct Binance {
         }
     }
     
-    public class Store: ExchangeDataStore<Ticker, Balance> {
+    public class Store: ExchangeDataStore<Ticker, Account.Balance> {
         public static var shared = Store()
         
         
@@ -70,7 +70,7 @@ public struct Binance {
         case account
     }
     
-    public class Service: Network {
+    public class Service: Network, ExchangeServiceType {
         
         private let key: String
         private let secret: String

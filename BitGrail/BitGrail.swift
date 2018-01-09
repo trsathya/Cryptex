@@ -85,7 +85,7 @@ public struct BitGrail {
         public var balanceResponse: HTTPURLResponse? = nil
     }
     
-    public class Service: Network {
+    public class Service: Network, ExchangeServiceType {
         private let key: String
         private let secret: String
         fileprivate let store = BitGrail.Store.shared

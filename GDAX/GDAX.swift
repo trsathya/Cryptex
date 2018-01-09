@@ -271,7 +271,7 @@ extension GDAX.API: APIType {
     }
 }
 
-extension GDAX.Service {
+extension GDAX.Service: ExchangeServiceType {
     public func getAccountBalances(completion: @escaping ( ResponseType) -> Void) {
         getProducts(completion: { (_) in
             var tasks: [String: Bool] = [:]
@@ -298,10 +298,12 @@ extension GDAX.Service {
         })
     }
     
-    public func getTickers(completion: @escaping (CurrencyPair, ResponseType) -> Void) {
+    public func getTickers(completion: @escaping (ResponseType) -> Void) {
         getProducts(completion: { (_) in
             self.store.productsResponse.products.forEach { product in
-                self.getTicker(symbol: product.id, completion: completion)
+                self.getTicker(symbol: product.id, completion: { (_, responseType) in
+                    completion(responseType)
+                })
             }
         })
     }

@@ -7,32 +7,65 @@
 
 import Foundation
 
-public protocol TickerType {
+public protocol TickerType: Comparable {
     var symbol: CurrencyPair { get }
     var price: NSDecimalNumber { get }
     var priceInUSD: NSDecimalNumber { get set }
+    var priceInBTC: NSDecimalNumber { get set }
+    var priceInETH: NSDecimalNumber { get set }
+    var priceInLTC: NSDecimalNumber { get set }
+    var priceInXRP: NSDecimalNumber { get set }
 }
 
-public class Ticker: TickerType, Comparable {
+extension TickerType {
+    
+    public var formattedPriceInUSD: String {
+        return NumberFormatter.usd.string(from: priceInUSD) ?? ""
+    }
+    
+    public static func <(lhs: Self, rhs: Self) -> Bool {
+        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedAscending
+    }
+    
+    public static func >(lhs: Self, rhs: Self) -> Bool {
+        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedDescending
+    }
+    
+    public static func ==(lhs: Self, rhs: Self) -> Bool {
+        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedSame
+    }
+}
+
+public class Ticker: TickerType {
     public let symbol: CurrencyPair
     public let price: NSDecimalNumber
     public var priceInUSD = NSDecimalNumber.zero
+    public var priceInBTC = NSDecimalNumber.zero
+    public var priceInETH = NSDecimalNumber.zero
+    public var priceInLTC = NSDecimalNumber.zero
+    public var priceInXRP = NSDecimalNumber.zero
     
     public init(symbol: CurrencyPair, price: NSDecimalNumber) {
         self.symbol = symbol
         self.price = price
     }
-    
-    public static func <(lhs: Ticker, rhs: Ticker) -> Bool {
-        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedAscending
-    }
-    
-    public static func >(lhs: Ticker, rhs: Ticker) -> Bool {
-        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedDescending
-    }
-    
-    public static func ==(lhs: Ticker, rhs: Ticker) -> Bool {
-        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedSame
-    }
+}
 
+public protocol DisplayableTickerType {
+    var name: String { get }
+    var price: String { get }
+    var priceInUSD: String { get }
+}
+
+public struct DisplayableTicker: DisplayableTickerType {
+    public var name: String
+    public var price: String
+    public var priceInUSD: String
+}
+
+public protocol TickerTableViewDataSource {
+    func sectionCount(for viewType: TickerViewType) -> Int
+    func rowCount(for section: Int, for viewType: TickerViewType) -> Int
+    func sectionHeaderTitle(for section: Int, for viewType: TickerViewType) -> String?
+    func displayableTicker(forindexPath: IndexPath, for viewType: TickerViewType) -> DisplayableTickerType?
 }
