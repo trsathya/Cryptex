@@ -15,31 +15,23 @@ public extension CurrencyPair {
 }
 
 public struct Koinex {
-    public struct Ticker {
-        public var symbol: CurrencyPair
-        public var price: NSDecimalNumber
-        
-        public init(symbol: CurrencyPair, price: NSDecimalNumber) {
-            self.symbol = symbol
-            self.price = price
-        }
-    }
     
-    public class Store: ExchangeDataStoreType {
+    public class Store: ExchangeDataStore<Ticker, Balance> {
         public static var shared = Store()
         
-        public var name: String = "Koinex"
+        override private init() {
+            super.init()
+            name = "Koinex"
+        }
         
-        private init() { }
-        
-        public var tickerResponse: (response: HTTPURLResponse?, tickers: [Koinex.Ticker]) = (nil, [])
+        public var tickerResponse: (response: HTTPURLResponse?, tickers: [Ticker]) = (nil, [])        
     }
     
     public enum API {
         case ticker
     }
     
-    public class Service: Network {
+    public class Service: Network, ExchangeServiceType {
         
         fileprivate let store = Koinex.Store.shared
         
@@ -53,13 +45,13 @@ public struct Koinex {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
-                    var tickers: [Koinex.Ticker] = []
+                    var tickers: [Ticker] = []
                     for (key, value) in prices {
                         let currency = self.userPreference.currencyStore.forCode(key)
                         let inr = self.userPreference.currencyStore.forCode("inr")
                         let symbol = CurrencyPair(quantity: currency, price: inr)
-                        let price = NSDecimalNumber(any: value)
-                        let ticker = Koinex.Ticker(symbol: symbol, price: price)
+                        let price = NSDecimalNumber(value)
+                        let ticker = Ticker(symbol: symbol, price: price)
                         tickers.append(ticker)
                     }
                     self.store.tickerResponse = (httpResponse, tickers)

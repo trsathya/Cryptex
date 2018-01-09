@@ -7,9 +7,13 @@
 
 import Foundation
 
-public func data(_ any: Any) -> Data? {
-    return try? JSONSerialization.data(withJSONObject: any, options: [])
+public extension Int {
+    public static let thousand = 1_000
+    public static let million = 1_000_000
+    public static let billion = 1_000_000
+    public static let trillion = 1_000_000_000
 }
+
 
 public extension Locale {
     static let enUS = Locale(identifier: "en-US")
@@ -65,17 +69,55 @@ public extension DateFormatter {
 }
 
 public extension NSDecimalNumber {
-    convenience init(any: Any?) {
-        self.init(string: any as? String)
+    convenience init(_ any: Any?) {
+        if let string = any as? String {
+            self.init(string: string)
+        } else if let number = (any as? NSNumber)?.decimalValue {
+            self.init(decimal: number)
+        } else {
+            self.init(value: 0)
+        }
     }
 
     static var thousand: NSDecimalNumber {
-        return NSDecimalNumber(value: 1000)
+        return NSDecimalNumber(value: Int.thousand)
+    }
+    
+    static var million: NSDecimalNumber {
+        return NSDecimalNumber(value: Int.million)
+    }
+    
+    static var billion: NSDecimalNumber {
+        return NSDecimalNumber(value: Int.billion)
+    }
+    
+    static var trillion: NSDecimalNumber {
+        return NSDecimalNumber(value: Int.trillion)
     }
     
     var timestampInSeconds: Int64 {
         let handler = NSDecimalNumberHandler(roundingMode: NSDecimalNumber.RoundingMode.down, scale: 0, raiseOnExactness: true, raiseOnOverflow: true, raiseOnUnderflow: true, raiseOnDivideByZero: true)
         return rounding(accordingToBehavior: handler).int64Value
+    }
+    
+    var shortFormatted: String {
+        var temp = self
+        var suffix = ""
+        if intValue >= Int.trillion {
+            temp = temp.dividing(by: .trillion)
+            suffix = "T"
+        } else if intValue >= Int.billion {
+            temp = temp.dividing(by: .billion)
+            suffix = "B"
+        }  else if intValue >= Int.million {
+            temp = temp.dividing(by: .million)
+            suffix = "M"
+        } else if intValue >= Int.thousand {
+            temp = temp.dividing(by: .thousand)
+            suffix = "K"
+        }
+        let num = NumberFormatter.usd.string(from: temp) ?? ""
+        return num + suffix
     }
 }
 
@@ -121,6 +163,18 @@ public extension Dictionary where Key: ExpressibleByStringLiteral, Value: Expres
             postDataString += "\(tuple.key)=\(tuple.value)"
         }
         return postDataString
+    }
+}
+
+extension Data {
+    var string: String? {
+        return String(data: self, encoding: .utf8)
+    }
+}
+
+public extension Dictionary {
+    var data: Data? {
+        return try? JSONSerialization.data(withJSONObject: self, options: [])
     }
 }
 

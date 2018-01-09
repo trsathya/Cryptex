@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct CurrencyPair: Hashable, Comparable {
+public class CurrencyPair: Equatable {
     
     public let quantity: Currency
     public let price: Currency
@@ -17,7 +17,7 @@ public struct CurrencyPair: Hashable, Comparable {
         self.price = price
     }
     
-    public init(symbol: String, currencyStore: CurrencyStoreType.Type) {
+    public convenience init(symbol: String, currencyStore: CurrencyStoreType) {
         let delimitterString = symbol.trimmingCharacters(in: .letters)
         if delimitterString.count == 1 {
             let currencySymbols = symbol.components(separatedBy: delimitterString)
@@ -37,15 +37,13 @@ public struct CurrencyPair: Hashable, Comparable {
         }
     }
     
-    public var displayName: String {
+    public var displaySymbol: String {
         let symbol = quantity.code + price.code
         return symbol.uppercased()
     }
     
     public var hashValue: Int {
-        get {
-            return quantity.hashValue ^ price.hashValue
-        }
+        return quantity.hashValue ^ price.hashValue
     }
     
     public static func <(lhs: CurrencyPair, rhs: CurrencyPair) -> Bool {
@@ -60,3 +58,8 @@ public struct CurrencyPair: Hashable, Comparable {
         return lhs.quantity == rhs.quantity && lhs.price == rhs.price
     }
 }
+
+public extension CurrencyPair {
+    static var btcusd = CurrencyPair(quantity: .Bitcoin, price: .USD)
+}
+
