@@ -33,7 +33,7 @@ open class Network {
     
     public func dataTaskFor(api: APIType, completion: ((Any, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
         let urlRequest = requestFor(api: api)
-        api.print("\(urlRequest.httpMethod) \(urlRequest.url)", content: .url)
+        api.print("\(urlRequest.httpMethod) \(urlRequest.url?.absoluteString ?? "")", content: .url)
         if LogLevel.requestHeaders.rawValue <= api.loggingEnabled.rawValue {
             urlRequest.printHeaders()
         }
@@ -43,26 +43,26 @@ open class Network {
                 api.print("Response Error: \(error)", content: .response)
             }
             
-            if let urlResponse = urlResponse {
-                api.print("Response Headers: \(urlResponse)", content: .responseHeaders)
-            }
+            let httpUrlResponse = urlResponse as? HTTPURLResponse
+            api.print("\(httpUrlResponse?.statusCode ?? 0) \(httpUrlResponse?.url?.absoluteString ?? "")", content: .url)
+            api.print("Response Headers: \(httpUrlResponse)", content: .responseHeaders)
             
             guard let data = data else {
-                print("No Data for request: \(urlRequest.url?.absoluteString)")
+                print("No Data for request: \(httpUrlResponse?.url?.absoluteString)")
                 return
             }
             
             guard let responseDataString = data.string else { return }
             
             guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
-                print("Data is not a json for request: \(urlRequest.url?.absoluteString)")
+                print("Data is not a json for request: \(httpUrlResponse?.url?.absoluteString)")
                 //api.print(responseDataString, content: .response)
-                completion?(responseDataString, urlResponse as? HTTPURLResponse, error)
+                completion?(responseDataString, httpUrlResponse, error)
                 return
             }
             api.print("Response Data: \(responseDataString)", content: .response)
             
-            completion?(json, urlResponse as? HTTPURLResponse, error)
+            completion?(json, httpUrlResponse, error)
         }
     }
     

@@ -66,8 +66,8 @@ public struct CoinExchange {
         public var sellOrderCount = NSDecimalNumber.zero
         
         public init?(json: [String: Any], markets: [String: Market]) {
-            guard let market = markets[marketID] else { return nil }
             marketID = json["MarketID"] as? String ?? ""
+            guard let market = markets[marketID] else { return nil }
             lastPrice = NSDecimalNumber(json["LastPrice"])
             change = NSDecimalNumber(json["Change"])
             highPrice = NSDecimalNumber(json["HighPrice"])
@@ -118,7 +118,7 @@ public struct CoinExchange {
         }
         
         public var currencyPairsResponse: (response: HTTPURLResponse?, currencyPairs: [String: Market]) = (nil, [:])
-        public var tickersResponse: (response: HTTPURLResponse?, tickers: [MarketSummary]) = (nil, [])
+        public var tickersResponse: HTTPURLResponse? = nil
         public var balanceResponse: HTTPURLResponse? = nil
     }
     
@@ -153,16 +153,16 @@ public struct CoinExchange {
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = CoinExchange.API.getmarketsummaries
-            if apiType.checkInterval(response: store.tickersResponse.response) {
+            if apiType.checkInterval(response: store.tickersResponse) {
                 completion(.cached)
             } else {
                 coinExchangeDataTaskFor(api: apiType) { (json, response, error) in
                     guard let marketSummaries = json as? [[String: String]] else { return }
                     
-                    let tickers: [MarketSummary] = marketSummaries.flatMap { MarketSummary(json: $0, markets: self.store.currencyPairsResponse.currencyPairs) }
+                    let tickers = marketSummaries.flatMap { MarketSummary(json: $0, markets: self.store.currencyPairsResponse.currencyPairs) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
-                    self.store.tickersResponse = (response, tickers)
+                    self.store.tickersResponse = response
                     completion(.fetched)
                     }.resume()
             }
@@ -259,8 +259,8 @@ extension CoinExchange.API: APIType {
     
     public var loggingEnabled: LogLevel {
         switch self {
-        case .getmarkets: return .responseHeaders
-        case .getmarketsummaries: return .responseHeaders
+        case .getmarkets: return .url
+        case .getmarketsummaries: return .url
         case .getBalance: return .url
         }
     }

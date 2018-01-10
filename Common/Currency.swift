@@ -40,7 +40,27 @@ public extension Currency {
         self.init(name: code, code: code)
     }
     
-    static let USD = Currency(name: "US Dollar", code: "USD")
+    static let USD = Currency(name: "United States dollar", code: "USD")
+    static let EUR = Currency(name: "Euro", code: "EUR")
+    static let JPY = Currency(name: "Japanese yen", code: "JPY")
+    static let GBP = Currency(name: "Pound sterling", code: "GBP")
+    static let AUD = Currency(name: "Australian dollar", code: "AUD")
+    static let CAD = Currency(name: "Canadian dollar", code: "CAD")
+    static let CHF = Currency(name: "Swiss franc", code: "CHF")
+    static let CNY = Currency(name: "Renminbi", code: "CNY")
+    static let SEK = Currency(name: "Swedish krona", code: "SEK")
+    static let NZD = Currency(name: "New Zealand dollar", code: "NZD")
+    static let MXN = Currency(name: "Mexican peso", code: "MXN")
+    static let SGD = Currency(name: "Singapore dollar", code: "SGD")
+    static let HKD = Currency(name: "Hong Kong dollar", code: "HKD")
+    static let NOK = Currency(name: "Norwegian krone", code: "NOK")
+    static let KRW = Currency(name: "South Korean won", code: "KRW")
+    static let TRY = Currency(name: "Turkish lira", code: "TRY")
+    static let RUB = Currency(name: "Russian ruble", code: "RUB")
+    static let INR = Currency(name: "Indian rupee", code: "INR")
+    static let BRL = Currency(name: "Brazilian real", code: "BRL")
+    static let ZAR = Currency(name: "South African rand", code: "ZAR")
+    
     static let Bitcoin = Currency(name: "Bitcoin", code: "BTC")
     static let Ethereum = Currency(name: "Ethereum", code: "ETH")
     static let Litecoin = Currency(name: "Litecoin", code: "LTC")
@@ -49,7 +69,7 @@ public extension Currency {
     static let NEM = Currency(name: "NEM", code: "XEM")
     static let USDT = Currency(name: "Tether USD", code: "USDT")
     static let currencies: [Currency] = [
-        USD,
+        USD, EUR, JPY, GBP, AUD, CAD, CHF, CNY, SEK, NZD, MXN, SGD, HKD, NOK, KRW, TRY, RUB, INR, BRL, ZAR,
         Bitcoin,
         Ethereum,
         Ripple,

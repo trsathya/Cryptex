@@ -10,8 +10,8 @@ import Foundation
 public class ExchangeDataStore<T: TickerType, U: BalanceType> {
     
     public var name = "ExchangeDataStore"
-    public var accountingCurrency = Currency.USD
-    public var commonCurrency = Currency.Bitcoin
+    public var accountingCurrency: Currency = .USD
+    public var commonCurrency: Currency = .Bitcoin
     
     public var tickerByQuantityCCY: [[T]] = []
     public var tickerByPriceCCY: [[T]] = []

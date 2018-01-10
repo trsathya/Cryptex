@@ -346,7 +346,7 @@ extension Cryptopia.API: APIType {
     public var loggingEnabled: LogLevel {
         switch self {
         case .getCurrencies: return .url
-        case .getTradePairs: return .responseHeaders
+        case .getTradePairs: return .url
         case .getMarkets: return .url
         case .getBalance: return .url
         }

@@ -200,9 +200,9 @@ extension Bitfinex.API: APIType {
     
     public var loggingEnabled: LogLevel {
         switch self {
-        case .symbols: return .response
-        case .ticker: return .response
-        case .balances: return .response
+        case .symbols: return .url
+        case .ticker: return .url
+        case .balances: return .url
         }
     }
     
