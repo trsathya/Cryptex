@@ -67,7 +67,6 @@ public struct Bitfinex {
         case symbols
         case ticker(String)
         case balances
-        case accountFees
     }
     
     public class Service: Network {
@@ -137,19 +136,6 @@ public struct Bitfinex {
             }
         }
         
-        public func getAccountFees(completion: @escaping (ResponseType) -> Void) {
-            let apiType = Bitfinex.API.accountFees
-            if apiType.checkInterval(response: store.accountFeesResponse) {
-                completion(.cached)
-            } else {
-                bitfinexDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    
-                    self.store.accountFeesResponse = httpResponse
-                    completion(.fetched)
-                    }.resume()
-            }
-        }
-        
         private func bitfinexDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
             return dataTaskFor(api: api) { (json, httpResponse, error) in
                 // Handle error here
@@ -197,7 +183,6 @@ extension Bitfinex.API: APIType {
         case .symbols: return "/v1/symbols"
         case .ticker(let symbol): return "/v1/pubticker/\(symbol)"
         case .balances: return "/v1/balances"
-        case .accountFees: return "/v1/summary"
         }
     }
     
@@ -210,7 +195,6 @@ extension Bitfinex.API: APIType {
         case .symbols: return false
         case .ticker: return false
         case .balances: return true
-        case .accountFees: return true
         }
     }
     
@@ -219,7 +203,6 @@ extension Bitfinex.API: APIType {
         case .symbols: return .response
         case .ticker: return .response
         case .balances: return .response
-        case .accountFees: return .response
         }
     }
     
@@ -232,7 +215,6 @@ extension Bitfinex.API: APIType {
         case .symbols: return .aMonth
         case .ticker: return .aMinute
         case .balances: return .aMinute
-        case .accountFees: return .aWeek
         }
     }
 }
