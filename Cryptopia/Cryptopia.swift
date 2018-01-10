@@ -194,7 +194,7 @@ public struct Cryptopia {
         }
     }
     
-    public class Service: Network, ExchangeServiceType {
+    public class Service: Network, TickerServiceType, BalanceServiceType {
         private let key: String
         private let secret: String
         fileprivate let store = Cryptopia.Store.shared

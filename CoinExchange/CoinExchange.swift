@@ -122,7 +122,7 @@ public struct CoinExchange {
         public var balanceResponse: HTTPURLResponse? = nil
     }
     
-    public class Service: Network, ExchangeServiceType {
+    public class Service: Network, TickerServiceType, BalanceServiceType {
         private let key: String
         private let secret: String
         fileprivate let store = CoinExchange.Store.shared
@@ -159,7 +159,7 @@ public struct CoinExchange {
                 coinExchangeDataTaskFor(api: apiType) { (json, response, error) in
                     guard let marketSummaries = json as? [[String: String]] else { return }
                     
-                    var tickers: [MarketSummary] = marketSummaries.flatMap { MarketSummary(json: $0, markets: self.store.currencyPairsResponse.currencyPairs) }
+                    let tickers: [MarketSummary] = marketSummaries.flatMap { MarketSummary(json: $0, markets: self.store.currencyPairsResponse.currencyPairs) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
                     self.store.tickersResponse = (response, tickers)
@@ -186,7 +186,7 @@ public struct CoinExchange {
                         let currency = self.userPreference.currencyStore.forCode(arg.key)
                         balances.append(Balance(json: value, currency: currency))
                     })
-
+                    self.store.balances = balances
                     self.store.balanceResponse = response
                     completion(.fetched)
                     

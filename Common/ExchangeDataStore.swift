@@ -113,7 +113,7 @@ extension ExchangeDataStore: TickerTableViewDataSource {
         default: return 0
         }
     }
-    public func rowCount(section: Int, viewType: TickerViewType) -> Int {
+    public func tickerCount(section: Int, viewType: TickerViewType) -> Int {
         switch viewType {
         case .quantity: return tickerByQuantityCCY[section].count
         case .price: return tickerByPriceCCY[section].count
@@ -131,6 +131,20 @@ extension ExchangeDataStore: TickerTableViewDataSource {
         guard let t = ticker(section: section, row: row, viewType: viewType) else { return nil }
         let displayable = DisplayableTicker(name: t.symbol.quantity.name, price: displayablePrice(ticker: t), priceInUSD: t.formattedPriceInUSD)
         return displayable
+    }
+}
+
+extension ExchangeDataStore: BalanceTableViewDataSource {
+    public func balanceCount() -> Int {
+        return balances.count
+    }
+    
+    public func displayableBalance(row: Int) -> DisplayableBalanceType {
+        let balance = balances[row]
+        let balanceInPreferredCurrency = self.balanceInPreferredCurrency(balance: balance)
+        let price = balanceInPreferredCurrency == balance.quantity ? "" : balance.quantity.stringValue
+        let priceInUSD = NumberFormatter.usd.string(from: balanceInPreferredCurrency) ?? ""
+        return DisplayableBalance(name: balance.currency.name, balanceQuantity: price, priceInUSD: priceInUSD)
     }
 }
 

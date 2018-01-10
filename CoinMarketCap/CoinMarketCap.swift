@@ -98,7 +98,7 @@ public struct CoinMarketCap {
         public var globalMarketDataResponse: (response: HTTPURLResponse?, globalData: GlobalMarketData?) = (nil, nil)
     }
     
-    public class Service: Network, ExchangeServiceType {
+    public class Service: Network, TickerServiceType {
         private let key: String
         private let secret: String
         fileprivate let store = CoinMarketCap.Store.shared

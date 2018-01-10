@@ -271,8 +271,9 @@ extension GDAX.API: APIType {
     }
 }
 
-extension GDAX.Service: ExchangeServiceType {
-    public func getAccountBalances(completion: @escaping ( ResponseType) -> Void) {
+extension GDAX.Service: TickerServiceType, BalanceServiceType {
+    
+    public func getBalances(completion: @escaping (ResponseType) -> Void) {
         getProducts(completion: { (_) in
             var tasks: [String: Bool] = [:]
             

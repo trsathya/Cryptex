@@ -70,7 +70,7 @@ public struct Binance {
         case account
     }
     
-    public class Service: Network, ExchangeServiceType {
+    public class Service: Network, TickerServiceType {
         
         private let key: String
         private let secret: String
@@ -220,9 +220,9 @@ extension Binance.API: APIType {
     }
 }
 
-public extension Binance.Service {
+extension Binance.Service: BalanceServiceType {
     
-    func getTickersAndBalances(completion: @escaping ( ResponseType) -> Void) {
+    public func getBalances(completion: @escaping ( ResponseType) -> Void) {
         getTickers(completion: { (_) in
             self.getAccount(completion: { (response) in
                 completion(response)

@@ -7,8 +7,12 @@
 
 import Foundation
 
-public protocol ExchangeServiceType {
+public protocol TickerServiceType {
     func getTickers(completion: @escaping (ResponseType) -> Void)
+}
+
+public protocol BalanceServiceType {
+    func getBalances(completion: @escaping (ResponseType) -> Void)
 }
 
 open class Network {
