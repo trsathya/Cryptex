@@ -26,6 +26,7 @@ Pod::Spec.new do |s|
     ss.dependency 'Cryptex/Cryptopia'
     ss.dependency 'Cryptex/BitGrail'
     ss.dependency 'Cryptex/CoinExchange'
+    ss.dependency 'Cryptex/Bitfinex'
   end
   s.subspec "Common" do |ss|
     ss.source_files  = "Common/**/*.swift"
@@ -64,6 +65,10 @@ Pod::Spec.new do |s|
   end
   s.subspec "CoinExchange" do |ss|
     ss.source_files  = "CoinExchange/**/*.swift"
+    ss.dependency 'Cryptex/Common'
+  end
+  s.subspec "Bitfinex" do |ss|
+    ss.source_files  = "Bitfinex/**/*.swift"
     ss.dependency 'Cryptex/Common'
   end
 end

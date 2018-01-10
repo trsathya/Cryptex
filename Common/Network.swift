@@ -56,6 +56,7 @@ open class Network {
             
             guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
                 print("Data is not a json for request: \(urlRequest.url?.absoluteString)")
+                //api.print(responseDataString, content: .response)
                 completion?(responseDataString, urlResponse as? HTTPURLResponse, error)
                 return
             }
