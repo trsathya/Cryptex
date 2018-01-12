@@ -10,8 +10,8 @@ import Foundation
 public class ExchangeDataStore<T: TickerType, U: BalanceType> {
     
     public var name = "ExchangeDataStore"
-    public var accountingCurrency = Currency.USD
-    public var commonCurrency = Currency.Bitcoin
+    public var accountingCurrency: Currency = .USD
+    public var commonCurrency: Currency = .Bitcoin
     
     public var tickerByQuantityCCY: [[T]] = []
     public var tickerByPriceCCY: [[T]] = []
@@ -84,12 +84,6 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
         }
     }
     
-    public func getTotalBalance() -> NSDecimalNumber {
-        var totalBalance = NSDecimalNumber.zero
-        balances.forEach { totalBalance = totalBalance.adding(balanceInPreferredCurrency(balance: $0)) }
-        return totalBalance
-    }
-    
     public func displayablePrice(ticker: T) -> String {
         guard ticker.symbol.price != accountingCurrency else { return "" }
         return ticker.price.stringValue + " " + ticker.symbol.price.code
@@ -113,7 +107,7 @@ extension ExchangeDataStore: TickerTableViewDataSource {
         default: return 0
         }
     }
-    public func rowCount(section: Int, viewType: TickerViewType) -> Int {
+    public func tickerCount(section: Int, viewType: TickerViewType) -> Int {
         switch viewType {
         case .quantity: return tickerByQuantityCCY[section].count
         case .price: return tickerByPriceCCY[section].count
@@ -131,6 +125,27 @@ extension ExchangeDataStore: TickerTableViewDataSource {
         guard let t = ticker(section: section, row: row, viewType: viewType) else { return nil }
         let displayable = DisplayableTicker(name: t.symbol.quantity.name, price: displayablePrice(ticker: t), priceInUSD: t.formattedPriceInUSD)
         return displayable
+    }
+}
+
+extension ExchangeDataStore: BalanceTableViewDataSource {
+    
+    public func getTotalBalance() -> NSDecimalNumber {
+        var totalBalance = NSDecimalNumber.zero
+        balances.forEach { totalBalance = totalBalance.adding(balanceInPreferredCurrency(balance: $0)) }
+        return totalBalance
+    }
+    
+    public func balanceCount() -> Int {
+        return balances.count
+    }
+    
+    public func displayableBalance(row: Int) -> DisplayableBalanceType {
+        let balance = balances[row]
+        let balanceInPreferredCurrency = self.balanceInPreferredCurrency(balance: balance)
+        let price = balanceInPreferredCurrency == balance.quantity ? "" : balance.quantity.stringValue
+        let priceInUSD = NumberFormatter.usd.string(from: balanceInPreferredCurrency) ?? ""
+        return DisplayableBalance(name: balance.currency.name, balanceQuantity: price, priceInUSD: priceInUSD)
     }
 }
 

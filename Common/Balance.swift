@@ -21,3 +21,15 @@ public class Balance: BalanceType {
         self.quantity = quantity
     }
 }
+
+public protocol DisplayableBalanceType {
+    var name: String { get }
+    var balanceQuantity: String { get }
+    var priceInUSD: String { get }
+}
+
+public struct DisplayableBalance: DisplayableBalanceType {
+    public let name: String
+    public let balanceQuantity: String
+    public let priceInUSD: String
+}

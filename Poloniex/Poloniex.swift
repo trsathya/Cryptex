@@ -171,7 +171,7 @@ public struct Poloniex {
         public var depositsWithdrawalsResponse: (response: HTTPURLResponse?, deposits: [Poloniex.Deposit], withdrawals: [Poloniex.Withdrawal]) = (nil, [], [])
     }
     
-    public class Service: Network, ExchangeServiceType {
+    public class Service: Network, TickerServiceType {
         
         private let key: String
         private let secret: String
@@ -323,7 +323,7 @@ public struct Poloniex {
                     
                     if let startRange = error.range(of: "Nonce must be greater than "), let endRange = error.range(of: ". You provided "), self.isMock == false {
                         let nonce = Int(error.substring(with: startRange.upperBound..<endRange.lowerBound))
-                        print("Setting nonce \(nonce) from api error")
+                        print("Setting nonce \(nonce ?? 0) from api error")
                     }
                     print("Poloniex error: %@", error)
                 }
@@ -547,9 +547,9 @@ extension Poloniex.PrivateAPI: APIType {
     }
 }
 
-public extension Poloniex.Service {
+extension Poloniex.Service: BalanceServiceType {
     
-    func getAccountBalances(completion: @escaping (ResponseType) -> Void) {
+    public func getBalances(completion: @escaping (ResponseType) -> Void) {
         
         getTickers(completion: { _ in
             self.returnBalances(completion: { responseType in
@@ -558,7 +558,7 @@ public extension Poloniex.Service {
         })
     }
     
-    func returnTradeHistory(start: Date, end: Date, completion: @escaping (ResponseType) -> Void, captcha: ((String) -> Void)?) {
+    public func returnTradeHistory(start: Date, end: Date, completion: @escaping (ResponseType) -> Void, captcha: ((String) -> Void)?) {
         getTickers(completion: { _ in
             self.returnTradeHistory(currencyPairSymbol: nil, start: start, end: end, completion: completion)
         })

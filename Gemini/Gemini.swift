@@ -458,7 +458,7 @@ extension Gemini.API: APIType {
     }
 }
 
-extension Gemini.Service: ExchangeServiceType {
+extension Gemini.Service: TickerServiceType, BalanceServiceType {
     public func getTickers(completion: @escaping (ResponseType) -> Void) {
         getSymbols(completion: { _ in
             
@@ -483,12 +483,12 @@ extension Gemini.Service: ExchangeServiceType {
         })
     }
     
-    public func getAccountBalances(completion: @escaping (ResponseType) -> Void, failure: ((String?, String?) -> Void)?) {
+    public func getBalances(completion: @escaping (ResponseType) -> Void) {
         
         getTickers(completion: { (_) in
             self.getAvailableBalances(completion: { (responseType) in
                 completion(responseType)
-            }, failure: failure)
+            }, failure: nil)
         })
     }
     

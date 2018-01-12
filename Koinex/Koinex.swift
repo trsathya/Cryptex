@@ -22,22 +22,23 @@ public struct Koinex {
         override private init() {
             super.init()
             name = "Koinex"
+            accountingCurrency = .INR
         }
         
-        public var tickerResponse: (response: HTTPURLResponse?, tickers: [Ticker]) = (nil, [])        
+        public var tickerResponse: HTTPURLResponse? = nil
     }
     
     public enum API {
         case ticker
     }
     
-    public class Service: Network, ExchangeServiceType {
+    public class Service: Network, TickerServiceType {
         
         fileprivate let store = Koinex.Store.shared
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = Koinex.API.ticker
-            if apiType.checkInterval(response: store.tickerResponse.response) {
+            if apiType.checkInterval(response: store.tickerResponse) {
                 completion(.cached)
             } else {
                 dataTaskFor(api: apiType, completion: { (json, httpResponse, error) in
@@ -54,7 +55,8 @@ public struct Koinex {
                         let ticker = Ticker(symbol: symbol, price: price)
                         tickers.append(ticker)
                     }
-                    self.store.tickerResponse = (httpResponse, tickers)
+                    self.store.setTickersInDictionary(tickers: tickers)
+                    self.store.tickerResponse = httpResponse
                     completion(.fetched)
                 }).resume()
             }

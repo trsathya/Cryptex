@@ -65,7 +65,13 @@ public struct DisplayableTicker: DisplayableTickerType {
 
 public protocol TickerTableViewDataSource {
     func sectionCount(viewType: TickerViewType) -> Int
-    func rowCount(section: Int, viewType: TickerViewType) -> Int
+    func tickerCount(section: Int, viewType: TickerViewType) -> Int
     func sectionHeaderTitle(section: Int, viewType: TickerViewType) -> String?
     func displayableTicker(section: Int, row: Int, viewType: TickerViewType) -> DisplayableTickerType?
+}
+
+public protocol BalanceTableViewDataSource {
+    func getTotalBalance() -> NSDecimalNumber
+    func balanceCount() -> Int
+    func displayableBalance(row: Int) -> DisplayableBalanceType
 }

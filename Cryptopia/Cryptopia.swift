@@ -194,7 +194,7 @@ public struct Cryptopia {
         }
     }
     
-    public class Service: Network, ExchangeServiceType {
+    public class Service: Network, TickerServiceType, BalanceServiceType {
         private let key: String
         private let secret: String
         fileprivate let store = Cryptopia.Store.shared
@@ -346,7 +346,7 @@ extension Cryptopia.API: APIType {
     public var loggingEnabled: LogLevel {
         switch self {
         case .getCurrencies: return .url
-        case .getTradePairs: return .responseHeaders
+        case .getTradePairs: return .url
         case .getMarkets: return .url
         case .getBalance: return .url
         }
