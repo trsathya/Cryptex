@@ -323,7 +323,7 @@ public struct Poloniex {
                     
                     if let startRange = error.range(of: "Nonce must be greater than "), let endRange = error.range(of: ". You provided "), self.isMock == false {
                         let nonce = Int(error.substring(with: startRange.upperBound..<endRange.lowerBound))
-                        print("Setting nonce \(nonce) from api error")
+                        print("Setting nonce \(nonce ?? 0) from api error")
                     }
                     print("Poloniex error: %@", error)
                 }

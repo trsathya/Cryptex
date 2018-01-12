@@ -45,17 +45,17 @@ open class Network {
             
             let httpUrlResponse = urlResponse as? HTTPURLResponse
             api.print("\(httpUrlResponse?.statusCode ?? 0) \(httpUrlResponse?.url?.absoluteString ?? "")", content: .url)
-            api.print("Response Headers: \(httpUrlResponse)", content: .responseHeaders)
+            api.print("Response Headers: \(String(describing: httpUrlResponse))", content: .responseHeaders)
             
             guard let data = data else {
-                print("No Data for request: \(httpUrlResponse?.url?.absoluteString)")
+                print("No Data for request: \(String(describing: httpUrlResponse?.url?.absoluteString))")
                 return
             }
             
             guard let responseDataString = data.string else { return }
             
             guard let json = try? JSONSerialization.jsonObject(with: data, options: []) else {
-                print("Data is not a json for request: \(httpUrlResponse?.url?.absoluteString)")
+                print("Data is not a json for request: \(String(describing: httpUrlResponse?.url?.absoluteString))")
                 //api.print(responseDataString, content: .response)
                 completion?(responseDataString, httpUrlResponse, error)
                 return

@@ -71,6 +71,7 @@ public protocol TickerTableViewDataSource {
 }
 
 public protocol BalanceTableViewDataSource {
+    func getTotalBalance() -> NSDecimalNumber
     func balanceCount() -> Int
     func displayableBalance(row: Int) -> DisplayableBalanceType
 }

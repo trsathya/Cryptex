@@ -17,6 +17,7 @@ public extension Int {
 
 public extension Locale {
     static let enUS = Locale(identifier: "en-US")
+    static let enIN = Locale(identifier: "en-IN")
 }
 
 public extension TimeInterval {
@@ -44,6 +45,13 @@ public extension NumberFormatter {
     static var usd: NumberFormatter {
         let formatter = NumberFormatter()
         formatter.locale = .enUS
+        formatter.numberStyle = .currency
+        return formatter
+    }
+    
+    static var inr: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.locale = .enIN
         formatter.numberStyle = .currency
         return formatter
     }

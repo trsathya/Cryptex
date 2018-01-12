@@ -84,12 +84,6 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
         }
     }
     
-    public func getTotalBalance() -> NSDecimalNumber {
-        var totalBalance = NSDecimalNumber.zero
-        balances.forEach { totalBalance = totalBalance.adding(balanceInPreferredCurrency(balance: $0)) }
-        return totalBalance
-    }
-    
     public func displayablePrice(ticker: T) -> String {
         guard ticker.symbol.price != accountingCurrency else { return "" }
         return ticker.price.stringValue + " " + ticker.symbol.price.code
@@ -135,6 +129,13 @@ extension ExchangeDataStore: TickerTableViewDataSource {
 }
 
 extension ExchangeDataStore: BalanceTableViewDataSource {
+    
+    public func getTotalBalance() -> NSDecimalNumber {
+        var totalBalance = NSDecimalNumber.zero
+        balances.forEach { totalBalance = totalBalance.adding(balanceInPreferredCurrency(balance: $0)) }
+        return totalBalance
+    }
+    
     public func balanceCount() -> Int {
         return balances.count
     }
