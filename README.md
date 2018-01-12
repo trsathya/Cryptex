@@ -8,7 +8,6 @@ Cryptex, a single Swift 4 library to access multiple crypto currency exchange AP
 
 - iOS 8.0+ | macOS 10.10+ | tvOS 9.0+ | watchOS 2.0+ 
 - Xcode 8.3+
-- Swift 3.1+
 
 ## Integration
 
