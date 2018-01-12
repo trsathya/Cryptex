@@ -39,7 +39,7 @@ github "trsathya/Cryptex" ~> 0.0.3
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/trsathya/Cryptex.git", from: "0, 0, 3"),
+    .Package(url: "https://github.com/trsathya/Cryptex.git", from: "0.0.3"),
 ]
 ```
 
