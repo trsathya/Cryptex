@@ -322,7 +322,7 @@ public struct Poloniex {
                 if let json = json as? [String: String], let error = json["error"] {
                     
                     if let startRange = error.range(of: "Nonce must be greater than "), let endRange = error.range(of: ". You provided "), self.isMock == false {
-                        let nonce = Int(error.substring(with: startRange.upperBound..<endRange.lowerBound))
+                        let nonce = Int(error[startRange.upperBound..<endRange.lowerBound])
                         print("Setting nonce \(nonce ?? 0) from api error")
                     }
                     print("Poloniex error: %@", error)
