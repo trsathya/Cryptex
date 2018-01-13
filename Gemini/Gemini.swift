@@ -167,11 +167,11 @@ public struct Gemini {
     
     public class Service: Network {
         
-        private let secret: String
-        private let key: String
+        private let key: String?
+        private let secret: String?
         fileprivate let store = Gemini.Store.shared
         
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
+        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
             self.key = key
             self.secret = secret
             super.init(session: session, userPreference: userPreference)
@@ -277,7 +277,7 @@ public struct Gemini {
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
             
-            guard api.authenticated else { return mutableURLRequest }
+            guard let key = key, let secret = secret, api.authenticated else { return mutableURLRequest }
             
             var postDataDictionary = api.postData
             if isMock {

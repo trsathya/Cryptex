@@ -123,11 +123,11 @@ public struct CoinExchange {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        private let key: String
-        private let secret: String
+        private let key: String?
+        private let secret: String?
         fileprivate let store = CoinExchange.Store.shared
         
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
+        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
             self.key = key
             self.secret = secret
             super.init(session: session, userPreference: userPreference)
@@ -207,7 +207,7 @@ public struct CoinExchange {
         
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 var postData = api.postData
                 postData["nonce"] = "\(Int(Date().timeIntervalSince1970 * 1000))"
                 let requestString = postData.queryString

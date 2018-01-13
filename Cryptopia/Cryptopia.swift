@@ -195,12 +195,12 @@ public struct Cryptopia {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        private let key: String
-        private let secret: String
+        private let key: String?
+        private let secret: String?
         fileprivate let store = Cryptopia.Store.shared
         var currencyStore: CurrencyStore?
         
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
+        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
             self.key = key
             self.secret = secret
             super.init(session: session, userPreference: userPreference)
@@ -290,7 +290,7 @@ public struct Cryptopia {
         
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 if let url = mutableURLRequest.url?.absoluteString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed),
                     let data = api.postData.data, let string = data.string {
                     api.print("Request Data: \(string)", content: .response)

@@ -108,12 +108,12 @@ public struct GDAX {
     
     public class Service: Network {
         
-        private let key: String
-        private let secret: String
+        private let key: String?
+        private let secret: String?
         private let passphrase: String
         fileprivate let store = GDAX.Store.shared
         
-        public required init(key: String, secret: String, passphrase: String, session: URLSession, userPreference: UserPreference) {
+        public required init(key: String?, secret: String?, passphrase: String, session: URLSession, userPreference: UserPreference) {
             self.key = key
             self.secret = secret
             self.passphrase = passphrase
@@ -194,7 +194,7 @@ public struct GDAX {
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
             
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 
                 var postDataString = ""
                 if let data = api.postData.data, let string = data.string, api.postData.count > 0 {
