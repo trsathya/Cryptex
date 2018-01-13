@@ -86,13 +86,13 @@ public struct Bitfinex {
             if apiType.checkInterval(response: store.symbolsResponse.response) {
                 completion(.cached)
             } else {
-                bitfinexDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let stringArray = json as? [String] else {
-                        completion(.noResponse)
+                bitfinexDataTaskFor(api: apiType, completion: { (response) in
+                    guard let stringArray = response.json as? [String] else {
+                        completion(.unexpected(response))
                         return
                     }
                     let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self.userPreference.currencyStore) }
-                    self.store.symbolsResponse = (response, geminiSymbols)
+                    self.store.symbolsResponse = (response.httpResponse, geminiSymbols)
                     completion(.fetched)
                 }).resume()
             }
@@ -103,13 +103,13 @@ public struct Bitfinex {
             if apiType.checkInterval(response: store.tickerResponse[symbol.displaySymbol]) {
                 completion(symbol, .cached)
             } else {
-                bitfinexDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let json = json as? [String: String] else {
-                        completion(symbol, .noResponse)
+                bitfinexDataTaskFor(api: apiType, completion: { (response) in
+                    guard let json = response.json as? [String: String] else {
+                        completion(symbol, .unexpected(response))
                         return
                     }
                     self.store.setTicker(ticker: Ticker(json: json, for: symbol), symbol: symbol.displaySymbol)
-                    self.store.tickerResponse[symbol.displaySymbol] = response
+                    self.store.tickerResponse[symbol.displaySymbol] = response.httpResponse
                     completion(symbol, .fetched)
                 }).resume()
             }
@@ -120,8 +120,8 @@ public struct Bitfinex {
             if apiType.checkInterval(response: store.balanceResponse) {
                 completion(.cached)
             } else {
-                bitfinexDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    guard let json = json as? [[String: String]] else {
+                bitfinexDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [[String: String]] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
@@ -130,16 +130,16 @@ public struct Bitfinex {
                         balances.append(Balance(json: dictionary, currencyStore: self.userPreference.currencyStore))
                     })
                     self.store.balances = balances
-                    self.store.balanceResponse = httpResponse
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                     }.resume()
             }
         }
         
-        private func bitfinexDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
+        private func bitfinexDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
                 // Handle error here
-                completion?(json, httpResponse, error)
+                completion?(response)
             }
         }
         

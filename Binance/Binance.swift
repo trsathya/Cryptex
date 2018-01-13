@@ -87,9 +87,9 @@ public struct Binance {
             if apiType.checkInterval(response: store.tickersResponse) {
                 completion(.cached)
             } else {
-                binanceDataTaskFor(api: apiType, completion: { (json, httpResponse, error) in
+                binanceDataTaskFor(api: apiType, completion: { (response) in
                     guard
-                        let tickerArray = json as? [[String: String]]
+                        let tickerArray = response.json as? [[String: String]]
                         else {
                             print("Error: Cast Failed in \(#function)")
                             return
@@ -103,7 +103,7 @@ public struct Binance {
                         tickers.append(ticker)
                     }
                     self.store.setTickersInDictionary(tickers: tickers)
-                    self.store.tickersResponse = httpResponse
+                    self.store.tickersResponse = response.httpResponse
                     completion(.fetched)
                     
                 }).resume()
@@ -115,8 +115,8 @@ public struct Binance {
             if apiType.checkInterval(response: store.accountResponse.response) {
                 completion(.cached)
             } else {
-                binanceDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    guard let json = json as? [String: Any] else {
+                binanceDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [String: Any] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
@@ -124,17 +124,16 @@ public struct Binance {
                     if let balances = account?.balances {
                         self.store.balances = balances
                     }
-                    self.store.accountResponse = (httpResponse, account)
+                    self.store.accountResponse = (response.httpResponse, account)
                     completion(.fetched)
                     }.resume()
             }
         }
         
-        func binanceDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
+        func binanceDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
                 // Handle error here
-                api.print(json, content: .response)
-                completion?(json, httpResponse, error)
+                completion?(response)
             }
         }
         

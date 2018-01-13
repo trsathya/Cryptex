@@ -216,8 +216,8 @@ public struct Cryptopia {
             if apiType.checkInterval(response: store.tickersResponse) {
                 completion(.cached)
             } else {
-                cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let tickerArray = json as? [[String: Any]] else { return }
+                cryptopiaDataTaskFor(api: apiType) { (response) in
+                    guard let tickerArray = response.json as? [[String: Any]] else { return }
                     var tickers: [Market] = []
                     for ticker in tickerArray {
                         let ticker = Market(json: ticker, currencyStore: self.activeCurrencyStore())
@@ -225,7 +225,7 @@ public struct Cryptopia {
                     }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
-                    self.store.tickersResponse = response
+                    self.store.tickersResponse = response.httpResponse
                     completion(.fetched)
                     
                     }.resume()
@@ -241,12 +241,12 @@ public struct Cryptopia {
                 
             } else {
                 
-                cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
+                cryptopiaDataTaskFor(api: apiType) { (response) in
                     
-                    guard let json = json as? [[String: Any]] else { return }
+                    guard let json = response.json as? [[String: Any]] else { return }
                     let balances = json.map { Balance(json: $0, currencyStore: self.activeCurrencyStore()) }.filter { $0.available != .zero }
                     self.store.balances = balances
-                    self.store.balanceResponse = response
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                     
                     }.resume()
@@ -259,11 +259,11 @@ public struct Cryptopia {
             if apiType.checkInterval(response: store.currenciesResponse.response) {
                 completion(.cached)
             } else {
-                cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let json = json as? [[String: Any]] else { return }
+                cryptopiaDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [[String: Any]] else { return }
                     let currencies = json.map { CryptopiaCurrency(json: $0) }
                     
-                    self.store.currenciesResponse = (response, currencies)
+                    self.store.currenciesResponse = (response.httpResponse, currencies)
                     self.currencyStore = CurrencyStore(currencies: currencies)
                     completion(.fetched)
                     
@@ -271,11 +271,13 @@ public struct Cryptopia {
             }
         }
         
-        func cryptopiaDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
-                guard let json = json as? [String: Any] else { return }
+        func cryptopiaDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
+                guard let json = response.json as? [String: Any] else { return }
                 if let success = json["Success"] as? Bool, let jsonData = json["Data"], success == true {
-                    completion?(jsonData, httpResponse, error)
+                    var tempResponse = response
+                    tempResponse.json = jsonData
+                    completion?(tempResponse)
                 } else {
                     // Handle error here
                     if let message = json["Message"] {

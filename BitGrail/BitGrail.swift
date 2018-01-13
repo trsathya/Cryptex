@@ -101,8 +101,8 @@ public struct BitGrail {
             if apiType.checkInterval(response: store.tickersResponse) {
                 completion(.cached)
             } else {
-                bitGrailDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let markets = json as? [String: Any] else { return }
+                bitGrailDataTaskFor(api: apiType) { (response) in
+                    guard let markets = response.json as? [String: Any] else { return }
                     
                     var tickers: [Market] = []
                     markets.forEach({ (keyValue) in
@@ -113,7 +113,7 @@ public struct BitGrail {
                         }
                     })
                     self.store.setTickersInDictionary(tickers: tickers)
-                    self.store.tickersResponse = response
+                    self.store.tickersResponse = response.httpResponse
                     completion(.fetched)
                     }.resume()
             }
@@ -128,8 +128,8 @@ public struct BitGrail {
                 
             } else {
                 
-                bitGrailDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let balancesJSON = json as? [String: Any] else { return }
+                bitGrailDataTaskFor(api: apiType) { (response) in
+                    guard let balancesJSON = response.json as? [String: Any] else { return }
                     
                     var balances: [Balance] = []
                     balancesJSON.forEach({ (arg) in
@@ -139,18 +139,20 @@ public struct BitGrail {
                     })
 
                     self.store.balances = balances
-                    self.store.balanceResponse = response
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                     
                     }.resume()
             }
         }
         
-        func bitGrailDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
-                guard let json = json as? [String: Any] else { return }
+        func bitGrailDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
+                guard let json = response.json as? [String: Any] else { return }
                 if let success = json["success"] as? Int, let jsonData = json["response"], success == 1 {
-                    completion?(jsonData, httpResponse, error)
+                    var tempResponse = response
+                    tempResponse.json = jsonData
+                    completion?(tempResponse)
                 } else {
                     // Handle error here
                 }

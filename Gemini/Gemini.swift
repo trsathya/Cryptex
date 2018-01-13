@@ -182,13 +182,13 @@ public struct Gemini {
             if apiType.checkInterval(response: store.symbolsResponse.response) {
                 completion(.cached)
             } else {
-                geminiDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let json = json, let stringArray = json as? [String] else {
-                        completion(.noResponse)
+                geminiDataTaskFor(api: apiType, completion: { (response) in
+                    guard let json = response.json, let stringArray = json as? [String] else {
+                        completion(.unexpected(response))
                         return
                     }
                     let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self.userPreference.currencyStore) }
-                    self.store.symbolsResponse = (response, geminiSymbols)
+                    self.store.symbolsResponse = (response.httpResponse, geminiSymbols)
                     completion(.fetched)
                 }, failure: nil).resume()
             }
@@ -199,14 +199,14 @@ public struct Gemini {
             if apiType.checkInterval(response: store.tickerResponse[symbol.displaySymbol]) {
                 completion(symbol, .cached)
             } else {
-                geminiDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let json = json, let ticker = Gemini.Ticker(json: json, for: symbol) else {
-                        completion(symbol, .noResponse)
+                geminiDataTaskFor(api: apiType, completion: { (response) in
+                    guard let json = response.json, let ticker = Gemini.Ticker(json: json, for: symbol) else {
+                        completion(symbol, .unexpected(response))
                         return
                     }
                     
                     self.store.setTicker(ticker: ticker, symbol: symbol.displaySymbol)
-                    self.store.tickerResponse[symbol.displaySymbol] = response
+                    self.store.tickerResponse[symbol.displaySymbol] = response.httpResponse
                     completion(symbol, .fetched)
                 }, failure: nil).resume()
             }
@@ -217,12 +217,12 @@ public struct Gemini {
             if apiType.checkInterval(response: store.symbolsResponse.response) {
                 completion(.cached)
             } else {
-                geminiDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let json = json, let currentOrderBook = Gemini.CurrentOrderBook(json: json) else {
-                        completion(.noResponse)
+                geminiDataTaskFor(api: apiType, completion: { (response) in
+                    guard let json = response.json, let currentOrderBook = Gemini.CurrentOrderBook(json: json) else {
+                        completion(.unexpected(response))
                         return
                     }
-                    self.store.currentOrderBookResponse = (response, currentOrderBook)
+                    self.store.currentOrderBookResponse = (response.httpResponse, currentOrderBook)
                     completion(.fetched)
                 }, failure: nil).resume()
             }
@@ -233,15 +233,15 @@ public struct Gemini {
             if apiType.checkInterval(response: store.balanceResponse) {
                 completion(.cached)
             } else {
-                geminiDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let array = json as? [[String: Any]] else {
-                        completion(.noResponse)
+                geminiDataTaskFor(api: apiType, completion: { (response) in
+                    guard let array = response.json as? [[String: Any]] else {
+                        completion(.unexpected(response))
                         return
                         
                     }
                     let balances = array.flatMap {Gemini.Balance(json: $0, currencyStore: self.userPreference.currencyStore)}
                     self.store.balances = balances
-                    self.store.balanceResponse = response
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                 }, failure: failure).resume()
             }
@@ -252,24 +252,24 @@ public struct Gemini {
             if apiType.checkInterval(response: store.pastTradesResponse[currencyPair.displaySymbol]?.response) {
                 completion(currencyPair, .cached)
             } else {
-                geminiDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let array = json as? [[String: Any]] else {
-                        completion(currencyPair, .noResponse)
+                geminiDataTaskFor(api: apiType, completion: { (response) in
+                    guard let array = response.json as? [[String: Any]] else {
+                        completion(currencyPair, .unexpected(response))
                         return
                     }
                     let pastTrades = array.flatMap {Gemini.PastTrade(json: $0, currencyStore: self.userPreference.currencyStore)}
-                    self.store.pastTradesResponse[currencyPair.displaySymbol] = (response, pastTrades)
+                    self.store.pastTradesResponse[currencyPair.displaySymbol] = (response.httpResponse, pastTrades)
                     completion(currencyPair, .fetched)
                 }, failure: failure).resume()
             }
         }
         
-        func geminiDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?, failure: ((String?, String?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
-                if let json = json as? [String: String], let result = json["result"], result == "error" {
+        func geminiDataTaskFor(api: APIType, completion: ((Response) -> Void)?, failure: ((String?, String?) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
+                if let json = response.json as? [String: String], let result = json["result"], result == "error" {
                     failure?(json["reason"], json["message"])
                 } else {
-                    completion?(json, httpResponse, error)
+                    completion?(response)
                 }
             }
         }

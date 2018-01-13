@@ -41,8 +41,8 @@ public struct Koinex {
             if apiType.checkInterval(response: store.tickerResponse) {
                 completion(.cached)
             } else {
-                dataTaskFor(api: apiType, completion: { (json, httpResponse, error) in
-                    guard let json = json as? [String: Any], let prices = json["prices"] as? [String: Any] else {
+                dataTaskFor(api: apiType, completion: { (response) in
+                    guard let json = response.json as? [String: Any], let prices = json["prices"] as? [String: Any] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
@@ -56,7 +56,7 @@ public struct Koinex {
                         tickers.append(ticker)
                     }
                     self.store.setTickersInDictionary(tickers: tickers)
-                    self.store.tickerResponse = httpResponse
+                    self.store.tickerResponse = response.httpResponse
                     completion(.fetched)
                 }).resume()
             }

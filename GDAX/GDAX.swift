@@ -125,13 +125,13 @@ public struct GDAX {
             if apiType.checkInterval(response: store.productsResponse.response) {
                 completion(.cached)
             } else {
-                gdaxDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    guard let json = json as? [[String: Any]] else {
+                gdaxDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [[String: Any]] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
                     
-                    self.store.productsResponse = (httpResponse, json.map({GDAX.Product(json: $0, currencyStore: self.userPreference.currencyStore)}).filter { self.userPreference.ignoredFiats.contains($0.quoteCurrency) == false })
+                    self.store.productsResponse = (response.httpResponse, json.map({GDAX.Product(json: $0, currencyStore: self.userPreference.currencyStore)}).filter { self.userPreference.ignoredFiats.contains($0.quoteCurrency) == false })
                     
                     completion(.fetched)
                     
@@ -149,13 +149,13 @@ public struct GDAX {
                 
             } else {
                 
-                gdaxDataTaskFor(api: apiType) { (json, response, error) in
+                gdaxDataTaskFor(api: apiType) { (response) in
                     
-                    guard let json = json as? [String: Any] else { return }
+                    guard let json = response.json as? [String: Any] else { return }
                     let ticker = GDAX.Ticker(json: json, symbol: symbol)
                     
                     self.store.setTicker(ticker: ticker, symbol: symbol.displaySymbol)
-                    self.store.tickersResponse[symbol.displaySymbol] = (response, ticker)
+                    self.store.tickersResponse[symbol.displaySymbol] = (response.httpResponse, ticker)
                     completion(symbol, .fetched)
                     
                     }.resume()
@@ -171,23 +171,23 @@ public struct GDAX {
                 completion(.cached)
                 
             } else {
-                gdaxDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    guard let json = json as? [[String: Any]] else {
+                gdaxDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [[String: Any]] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
                     let accounts = json.flatMap {GDAX.Account(json: $0, currencyStore: self.userPreference.currencyStore)}
                     self.store.balances = accounts
-                    self.store.accountsResponse = (httpResponse, accounts)
+                    self.store.accountsResponse = (response.httpResponse, accounts)
                     completion(.fetched)
                     }.resume()
             }
         }
         
-        func gdaxDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
+        func gdaxDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
                 // Handle error here
-                completion?(json, httpResponse, error)
+                completion?(response)
             }
         }
         

@@ -186,3 +186,8 @@ public extension Dictionary {
     }
 }
 
+extension HTTPURLResponse {
+    open override var description: String {
+        return "\(statusCode) \(self.url?.absoluteString ?? "")"
+    }
+}

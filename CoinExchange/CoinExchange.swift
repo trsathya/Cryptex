@@ -138,14 +138,14 @@ public struct CoinExchange {
             if apiType.checkInterval(response: store.currencyPairsResponse.response) {
                 completion(.cached)
             } else {
-                coinExchangeDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let marketsJSON = json as? [[String: Any]] else { return }
+                coinExchangeDataTaskFor(api: apiType) { (response) in
+                    guard let marketsJSON = response.json as? [[String: Any]] else { return }
                     var markets: [String: Market] = [:]
                     marketsJSON.forEach({ (marketJSON) in
                         let market = Market(json: marketJSON)
                         markets[market.marketID] = market
                     })
-                    self.store.currencyPairsResponse = (response, markets)
+                    self.store.currencyPairsResponse = (response.httpResponse, markets)
                     completion(.fetched)
                 }.resume()
             }
@@ -156,13 +156,13 @@ public struct CoinExchange {
             if apiType.checkInterval(response: store.tickersResponse) {
                 completion(.cached)
             } else {
-                coinExchangeDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let marketSummaries = json as? [[String: String]] else { return }
+                coinExchangeDataTaskFor(api: apiType) { (response) in
+                    guard let marketSummaries = response.json as? [[String: String]] else { return }
                     
                     let tickers = marketSummaries.flatMap { MarketSummary(json: $0, markets: self.store.currencyPairsResponse.currencyPairs) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
-                    self.store.tickersResponse = response
+                    self.store.tickersResponse = response.httpResponse
                     completion(.fetched)
                     }.resume()
             }
@@ -177,8 +177,8 @@ public struct CoinExchange {
                 
             } else {
                 
-                coinExchangeDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let balancesJSON = json as? [String: Any] else { return }
+                coinExchangeDataTaskFor(api: apiType) { (response) in
+                    guard let balancesJSON = response.json as? [String: Any] else { return }
                     
                     var balances: [Balance] = []
                     balancesJSON.forEach({ (arg) in
@@ -187,18 +187,20 @@ public struct CoinExchange {
                         balances.append(Balance(json: value, currency: currency))
                     })
                     self.store.balances = balances
-                    self.store.balanceResponse = response
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                     
                     }.resume()
             }
         }
         
-        func coinExchangeDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
-                guard let json = json as? [String: Any] else { return }
+        func coinExchangeDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
+                guard let json = response.json as? [String: Any] else { return }
                 if let success = json["success"] as? String, let jsonData = json["result"], Int(success) == 1 {
-                    completion?(jsonData, httpResponse, error)
+                    var tempResponse = response
+                    tempResponse.json = jsonData
+                    completion?(tempResponse)
                 } else {
                     api.print(json["message"] ?? "", content: .response)
                 }
