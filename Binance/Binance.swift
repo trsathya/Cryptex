@@ -72,16 +72,8 @@ public struct Binance {
     
     public class Service: Network, TickerServiceType {
         
-        private let key: String?
-        private let secret: String?
         fileprivate let store = Binance.Store.shared
         
-        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = Binance.API.getAllPrices
             if apiType.checkInterval(response: store.tickersResponse) {
@@ -97,7 +89,7 @@ public struct Binance {
                     
                     var tickers: [Ticker] = []
                     for ticker in tickerArray {
-                        let currencyPair = CurrencyPair(symbol: ticker["symbol"] ?? "", currencyStore: self.userPreference.currencyStore)
+                        let currencyPair = CurrencyPair(symbol: ticker["symbol"] ?? "", currencyStore: self)
                         let price = NSDecimalNumber(string: ticker["price"])
                         let ticker = Ticker(symbol: currencyPair, price: price)
                         tickers.append(ticker)
@@ -120,7 +112,7 @@ public struct Binance {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
-                    let account = Binance.Account(json: json, currencyStore: self.userPreference.currencyStore)
+                    let account = Binance.Account(json: json, currencyStore: self)
                     if let balances = account?.balances {
                         self.store.balances = balances
                     }

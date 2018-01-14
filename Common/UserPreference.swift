@@ -11,14 +11,12 @@ public struct UserPreference {
     public var fiat: Currency
     public var crypto: Currency
     public var ignoredFiats: [Currency]
-    public var currencyStore: CurrencyStoreType
     //public var accounting: Accounting
     
-    public init(fiat: Currency, crypto: Currency, ignoredFiats: [Currency], currencyStore: CurrencyStoreType) {
+    public init(fiat: Currency, crypto: Currency, ignoredFiats: [Currency]) {
         self.fiat = fiat
         self.crypto = crypto
         self.ignoredFiats = ignoredFiats
-        self.currencyStore = currencyStore
     }
 }
 

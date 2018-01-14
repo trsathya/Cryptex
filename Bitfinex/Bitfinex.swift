@@ -71,15 +71,7 @@ public struct Bitfinex {
     
     public class Service: Network {
         
-        private let key: String?
-        private let secret: String?
         fileprivate let store = Bitfinex.Store.shared
-        
-        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
         
         public func getSymbols(completion: @escaping (ResponseType) -> Void) {
             let apiType = Bitfinex.API.symbols
@@ -91,7 +83,7 @@ public struct Bitfinex {
                         completion(.unexpected(response))
                         return
                     }
-                    let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self.userPreference.currencyStore) }
+                    let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self) }
                     self.store.symbolsResponse = (response.httpResponse, geminiSymbols)
                     completion(.fetched)
                 }).resume()
@@ -127,7 +119,7 @@ public struct Bitfinex {
                     }
                     var balances: [Balance] = []
                     json.forEach({ (dictionary) in
-                        balances.append(Balance(json: dictionary, currencyStore: self.userPreference.currencyStore))
+                        balances.append(Balance(json: dictionary, currencyStore: self))
                     })
                     self.store.balances = balances
                     self.store.balanceResponse = response.httpResponse

@@ -173,16 +173,8 @@ public struct Poloniex {
     
     public class Service: Network, TickerServiceType {
         
-        private let key: String?
-        private let secret: String?
         fileprivate let store = Poloniex.Store.shared
         
-        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             
             let apiType = Poloniex.PublicAPI.returnTicker
@@ -198,7 +190,7 @@ public struct Poloniex {
                     if let dateString = response.httpResponse?.allHeaderFields["Date"] as? String, let parsedDate = DateFormatter.httpHeader.date(from: dateString) {
                         date = parsedDate
                     }
-                    let tickers = json.flatMap { Poloniex.Ticker(json: $0.value, symbol: CurrencyPair(poloniexSymbol: $0.key, currencyStore: self.userPreference.currencyStore), timestamp: date) }
+                    let tickers = json.flatMap { Poloniex.Ticker(json: $0.value, symbol: CurrencyPair(poloniexSymbol: $0.key, currencyStore: self), timestamp: date) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
                     self.store.tickerResponse = response.httpResponse
@@ -226,7 +218,7 @@ public struct Poloniex {
                     var balances: [Balance] = []
                     filtered.forEach { (arg) in
                         let (key, value) = arg
-                        balances.append(Balance(currency: self.userPreference.currencyStore.forCode(key), quantity: NSDecimalNumber(string: value)))
+                        balances.append(Balance(currency: self.forCode(key), quantity: NSDecimalNumber(string: value)))
                     }
                     self.store.balances = balances
                     self.store.balanceResponse = response.httpResponse
@@ -249,7 +241,7 @@ public struct Poloniex {
                     }
                     var trades: [String: [Poloniex.PastTrade]] = [:]
                     json.forEach { key, value in
-                        let currencyPair = CurrencyPair(poloniexSymbol: key, currencyStore: self.userPreference.currencyStore)
+                        let currencyPair = CurrencyPair(poloniexSymbol: key, currencyStore: self)
                         var tradesArray: [Poloniex.PastTrade] = []
                         value.forEach { tradeJson in
                             tradesArray.append(Poloniex.PastTrade(json: tradeJson))
@@ -292,13 +284,13 @@ public struct Poloniex {
                 var deposits: [Poloniex.Deposit] = []
                 if let array = json["deposits"] as? [[String: Any]] {
                     deposits = array.flatMap { item -> Poloniex.Deposit? in
-                        return Poloniex.Deposit(json: item, currencyStore: self.userPreference.currencyStore)
+                        return Poloniex.Deposit(json: item, currencyStore: self)
                     }
                 }
                 var withdrawals: [Poloniex.Withdrawal] = []
                 if let array = json["withdrawals"] as? [[String: Any]] {
                     withdrawals = array.flatMap { item -> Poloniex.Withdrawal? in
-                        return Poloniex.Withdrawal(json: item, currencyStore: self.userPreference.currencyStore)
+                        return Poloniex.Withdrawal(json: item, currencyStore: self)
                     }
                 }
                 

@@ -108,16 +108,12 @@ public struct GDAX {
     
     public class Service: Network {
         
-        private let key: String?
-        private let secret: String?
         private let passphrase: String
         fileprivate let store = GDAX.Store.shared
         
-        public required init(key: String?, secret: String?, passphrase: String, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
+        public required init(key: String?, secret: String?, passphrase: String, session: URLSession, userPreference: UserPreference, currencyOverrides: [String: Currency]?) {
             self.passphrase = passphrase
-            super.init(session: session, userPreference: userPreference)
+            super.init(key: key, secret: secret, session: session, userPreference: userPreference, currencyOverrides: nil)
         }
         
         public func getProducts(completion: @escaping (ResponseType) -> Void) {
@@ -131,7 +127,7 @@ public struct GDAX {
                         return
                     }
                     
-                    self.store.productsResponse = (response.httpResponse, json.map({GDAX.Product(json: $0, currencyStore: self.userPreference.currencyStore)}).filter { self.userPreference.ignoredFiats.contains($0.quoteCurrency) == false })
+                    self.store.productsResponse = (response.httpResponse, json.map({GDAX.Product(json: $0, currencyStore: self)}).filter { self.userPreference.ignoredFiats.contains($0.quoteCurrency) == false })
                     
                     completion(.fetched)
                     
@@ -176,7 +172,7 @@ public struct GDAX {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
-                    let accounts = json.flatMap {GDAX.Account(json: $0, currencyStore: self.userPreference.currencyStore)}
+                    let accounts = json.flatMap {GDAX.Account(json: $0, currencyStore: self)}
                     self.store.balances = accounts
                     self.store.accountsResponse = (response.httpResponse, accounts)
                     completion(.fetched)

@@ -167,16 +167,8 @@ public struct Gemini {
     
     public class Service: Network {
         
-        private let key: String?
-        private let secret: String?
         fileprivate let store = Gemini.Store.shared
         
-        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
         public func getSymbols(completion: @escaping (ResponseType) -> Void) {
             let apiType = Gemini.API.symbols
             if apiType.checkInterval(response: store.symbolsResponse.response) {
@@ -187,7 +179,7 @@ public struct Gemini {
                         completion(.unexpected(response))
                         return
                     }
-                    let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self.userPreference.currencyStore) }
+                    let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self) }
                     self.store.symbolsResponse = (response.httpResponse, geminiSymbols)
                     completion(.fetched)
                 }, failure: nil).resume()
@@ -239,7 +231,7 @@ public struct Gemini {
                         return
                         
                     }
-                    let balances = array.flatMap {Gemini.Balance(json: $0, currencyStore: self.userPreference.currencyStore)}
+                    let balances = array.flatMap {Gemini.Balance(json: $0, currencyStore: self)}
                     self.store.balances = balances
                     self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
@@ -257,7 +249,7 @@ public struct Gemini {
                         completion(currencyPair, .unexpected(response))
                         return
                     }
-                    let pastTrades = array.flatMap {Gemini.PastTrade(json: $0, currencyStore: self.userPreference.currencyStore)}
+                    let pastTrades = array.flatMap {Gemini.PastTrade(json: $0, currencyStore: self)}
                     self.store.pastTradesResponse[currencyPair.displaySymbol] = (response.httpResponse, pastTrades)
                     completion(currencyPair, .fetched)
                 }, failure: failure).resume()

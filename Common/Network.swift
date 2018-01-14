@@ -31,18 +31,24 @@ public struct Response {
 
 open class Network {
     
+    let key: String?
+    let secret: String?
     private let session: URLSession
     private var previousNonce: Int64 = 0
     private let nonceQueue = DispatchQueue(label: "com.sathyakumar.cryptex.network.nonce")
     public let userPreference: UserPreference
+    var currencyOverrides: [String: Currency]?
     
     public var isMock: Bool {
         return session is MockURLSession
     }
     
-    public init(session: URLSession, userPreference: UserPreference) {
+    public init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference, currencyOverrides: [String: Currency]?) {
+        self.key = key
+        self.secret = secret
         self.session = session
         self.userPreference = userPreference
+        self.currencyOverrides = currencyOverrides
     }
     
     public func dataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
@@ -81,6 +87,30 @@ open class Network {
         }
         previousNonce = ts
         return ts
+    }
+}
+
+extension Network: CurrencyStoreType {
+    public func isKnown(code: String) -> Bool {
+        let uppercased = code.uppercased()
+        if let overrides = currencyOverrides, let _ = overrides[uppercased] {
+            return true
+        } else if let _ = Currency.currencyLookupDictionary[uppercased] {
+            return true
+        } else {
+            return false
+        }
+    }
+    
+    public func forCode(_ code: String) -> Currency {
+        let uppercased = code.uppercased()
+        if let overrides = currencyOverrides, let currency = overrides[uppercased] {
+            return currency
+        } else if let currency = Currency.currencyLookupDictionary[uppercased] {
+            return currency
+        } else {
+            return Currency(code: code)
+        }
     }
 }
 

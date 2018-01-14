@@ -86,16 +86,8 @@ public struct BitGrail {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        private let key: String?
-        private let secret: String?
         fileprivate let store = BitGrail.Store.shared
         
-        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = BitGrail.API.getMarkets
             if apiType.checkInterval(response: store.tickersResponse) {
@@ -108,7 +100,7 @@ public struct BitGrail {
                     markets.forEach({ (keyValue) in
                         if let tickersArray = keyValue.value as? [[String: String]] {
                             for tickerJSON in tickersArray {
-                                tickers.append(Market(json: tickerJSON, currencyStore: self.userPreference.currencyStore))
+                                tickers.append(Market(json: tickerJSON, currencyStore: self))
                             }
                         }
                     })
@@ -134,7 +126,7 @@ public struct BitGrail {
                     var balances: [Balance] = []
                     balancesJSON.forEach({ (arg) in
                         guard let value = arg.value as? [String: String] else { return }
-                        let currency = self.userPreference.currencyStore.forCode(arg.key)
+                        let currency = self.forCode(arg.key)
                         balances.append(Balance(json: value, currency: currency))
                     })
 

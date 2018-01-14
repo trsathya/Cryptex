@@ -123,16 +123,8 @@ public struct CoinExchange {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        private let key: String?
-        private let secret: String?
         fileprivate let store = CoinExchange.Store.shared
         
-        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
         public func getCurrencyPairs(completion: @escaping (ResponseType) -> Void) {
             let apiType = CoinExchange.API.getmarkets
             if apiType.checkInterval(response: store.currencyPairsResponse.response) {
@@ -183,7 +175,7 @@ public struct CoinExchange {
                     var balances: [Balance] = []
                     balancesJSON.forEach({ (arg) in
                         guard let value = arg.value as? [String: String] else { return }
-                        let currency = self.userPreference.currencyStore.forCode(arg.key)
+                        let currency = self.forCode(arg.key)
                         balances.append(Balance(json: value, currency: currency))
                     })
                     self.store.balances = balances

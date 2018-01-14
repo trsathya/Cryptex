@@ -195,21 +195,7 @@ public struct Cryptopia {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        private let key: String?
-        private let secret: String?
         fileprivate let store = Cryptopia.Store.shared
-        var currencyStore: CurrencyStore?
-        
-        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
-        func activeCurrencyStore() -> CurrencyStoreType {
-            guard let currencyStore = currencyStore else { return userPreference.currencyStore }
-            return currencyStore
-        }
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = Cryptopia.API.getMarkets
@@ -220,7 +206,7 @@ public struct Cryptopia {
                     guard let tickerArray = response.json as? [[String: Any]] else { return }
                     var tickers: [Market] = []
                     for ticker in tickerArray {
-                        let ticker = Market(json: ticker, currencyStore: self.activeCurrencyStore())
+                        let ticker = Market(json: ticker, currencyStore: self)
                         tickers.append(ticker)
                     }
                     self.store.setTickersInDictionary(tickers: tickers)
@@ -244,7 +230,7 @@ public struct Cryptopia {
                 cryptopiaDataTaskFor(api: apiType) { (response) in
                     
                     guard let json = response.json as? [[String: Any]] else { return }
-                    let balances = json.map { Balance(json: $0, currencyStore: self.activeCurrencyStore()) }.filter { $0.available != .zero }
+                    let balances = json.map { Balance(json: $0, currencyStore: self) }.filter { $0.available != .zero }
                     self.store.balances = balances
                     self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
@@ -264,7 +250,7 @@ public struct Cryptopia {
                     let currencies = json.map { CryptopiaCurrency(json: $0) }
                     
                     self.store.currenciesResponse = (response.httpResponse, currencies)
-                    self.currencyStore = CurrencyStore(currencies: currencies)
+                    self.currencyOverrides = Currency.dictionary(array: currencies)
                     completion(.fetched)
                     
                     }.resume()

@@ -99,15 +99,7 @@ public struct CoinMarketCap {
     }
     
     public class Service: Network, TickerServiceType {
-        private let key: String?
-        private let secret: String?
         fileprivate let store = CoinMarketCap.Store.shared
-        
-        public required init(key: String?, secret: String?, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = CoinMarketCap.API.getTicker

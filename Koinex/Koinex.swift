@@ -48,8 +48,8 @@ public struct Koinex {
                     }
                     var tickers: [Ticker] = []
                     for (key, value) in prices {
-                        let currency = self.userPreference.currencyStore.forCode(key)
-                        let inr = self.userPreference.currencyStore.forCode("inr")
+                        let currency = self.forCode(key)
+                        let inr = self.forCode("inr")
                         let symbol = CurrencyPair(quantity: currency, price: inr)
                         let price = NSDecimalNumber(value)
                         let ticker = Ticker(symbol: symbol, price: price)
