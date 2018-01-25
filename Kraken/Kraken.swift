@@ -33,7 +33,7 @@ public struct Kraken {
             super.init(symbol: symbol, price: lastPrice)
         }
     }
-    
+
     public class Balance: Cryptex.Balance {
         
         public let type: String
@@ -48,7 +48,7 @@ public struct Kraken {
         }
     }
     
-    public class Store: ExchangeDataStore<Ticker, Balance> {
+    public class Store: ExchangeDataStore<Ticker, Balance, Order> {
         public static var shared = Store()
         
         override private init() {

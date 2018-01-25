@@ -107,8 +107,8 @@ public struct CoinExchange {
         case getmarketsummaries
         case getBalance
     }
-    
-    public class Store: ExchangeDataStore<MarketSummary, Balance> {
+
+    public class Store: ExchangeDataStore<MarketSummary, Balance, Order> {
         public static var shared = Store()
                 
         override private init() {

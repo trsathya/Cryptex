@@ -86,8 +86,8 @@ public struct GDAX {
             super.init(currency: currencyStore.forCode( json["currency"] as? String ?? "" ), quantity: NSDecimalNumber(json["balance"]))
         }
     }
-    
-    public class Store: ExchangeDataStore<Ticker, Account> {
+
+    public class Store: ExchangeDataStore<Ticker, Account, Order> {
         public static var shared = Store()
         
         override private init() {

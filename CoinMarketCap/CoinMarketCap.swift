@@ -85,7 +85,7 @@ public struct CoinMarketCap {
         case getGlobal
     }
     
-    public class Store: ExchangeDataStore<CMCTicker, Balance> {
+    public class Store: ExchangeDataStore<CMCTicker, Balance, Order> {
         public static var shared = Store()
                 
         override private init() {

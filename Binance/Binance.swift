@@ -35,7 +35,7 @@ public struct Binance {
                 balances = []
             }
         }
-        
+
         public class Balance: Cryptex.Balance {
             public var locked: NSDecimalNumber
             
@@ -51,7 +51,7 @@ public struct Binance {
         }
     }
     
-    public class Store: ExchangeDataStore<Ticker, Account.Balance> {
+    public class Store: ExchangeDataStore<Ticker, Account.Balance, Order> {
         public static var shared = Store()
         
         

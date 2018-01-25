@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class ExchangeDataStore<T: TickerType, U: BalanceType> {
+public class ExchangeDataStore<T: TickerType, U: BalanceType, O: OrderProtocol> {
     
     public var name = "ExchangeDataStore"
     public var accountingCurrency: Currency = .USD
@@ -18,7 +18,8 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
     public var tickerByName: [T] = []
     
     public var balances: [U] = []
-    
+    public var openOrders: [O] = []
+
     public var tickersDictionary: [String: T] = [:] {
         didSet {
             let tickers = tickersDictionary.values.flatMap{$0}

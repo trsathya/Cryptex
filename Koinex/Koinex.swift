@@ -16,7 +16,7 @@ public extension CurrencyPair {
 
 public struct Koinex {
     
-    public class Store: ExchangeDataStore<Ticker, Balance> {
+    public class Store: ExchangeDataStore<Ticker, Balance, Order> {
         public static var shared = Store()
         
         override private init() {

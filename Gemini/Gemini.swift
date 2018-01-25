@@ -123,8 +123,8 @@ public struct Gemini {
             isAuctionFill = json["is_auction_fill"] as! Bool
         }
     }
-    
-    public class Store: ExchangeDataStore<Ticker, Balance> {
+
+    public class Store: ExchangeDataStore<Ticker, Balance, Order> {
         public static var shared = Store()
         
         override private init() {

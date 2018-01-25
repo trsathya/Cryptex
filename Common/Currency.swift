@@ -60,7 +60,6 @@ public extension Currency {
     static let INR = Currency(name: "Indian rupee", code: "INR")
     static let BRL = Currency(name: "Brazilian real", code: "BRL")
     static let ZAR = Currency(name: "South African rand", code: "ZAR")
-    
     static let Bitcoin = Currency(name: "Bitcoin", code: "BTC")
     static let Ethereum = Currency(name: "Ethereum", code: "ETH")
     static let Litecoin = Currency(name: "Litecoin", code: "LTC")
@@ -68,6 +67,13 @@ public extension Currency {
     static let Cardano = Currency(name: "Cardano", code: "ADA")
     static let NEM = Currency(name: "NEM", code: "XEM")
     static let USDT = Currency(name: "Tether USD", code: "USDT")
+    static let ETC = Currency(name: "Ethereum Classic", code: "ETC")
+    static let BCH = Currency(name: "Bitcoin Cash", code: "BCH")
+    static let DOGE = Currency(name: "Dogecoin", code: "DOGE")
+    static let XMR = Currency(name: "Monero", code: "XMR")
+    static let ZEC = Currency(name: "Zcash", code: "ZEC")
+    static let DASH = Currency(name: "Dash", code: "DASH")
+    
     static let currencies: [Currency] = [
         USD, EUR, JPY, GBP, AUD, CAD, CHF, CNY, SEK, NZD, MXN, SGD, HKD, NOK, KRW, TRY, RUB, INR, BRL, ZAR,
         Bitcoin,
@@ -76,6 +82,12 @@ public extension Currency {
         Litecoin,
         Cardano,
         NEM,
-        USDT
-        ]
+        USDT,
+        ETC,
+        BCH,
+        DOGE,
+        XMR,
+        ZEC,
+        DASH
+    ]
 }
