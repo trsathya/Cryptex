@@ -134,7 +134,7 @@ public struct Poloniex {
             status = json["status"] as? String ?? ""
         }
     }
-    
+        
     public struct Withdrawal {
         public var withdrawalNumber: Int
         public var currency: Currency
@@ -155,7 +155,7 @@ public struct Poloniex {
         }
     }
     
-    public class Store: ExchangeDataStore<Poloniex.Ticker, Balance> {
+    public class Store: ExchangeDataStore<Poloniex.Ticker, Balance, Order> {
         public static var shared = Store()
         
         override private init() {

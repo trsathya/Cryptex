@@ -72,7 +72,7 @@ public struct BitGrail {
         case getBalance
     }
     
-    public class Store: ExchangeDataStore<Market, Balance> {
+    public class Store: ExchangeDataStore<Market, Balance, Order> {
         public static var shared = Store()
         
         override private init() {

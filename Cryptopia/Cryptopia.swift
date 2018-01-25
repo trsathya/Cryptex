@@ -102,6 +102,24 @@ public struct Cryptopia {
         }
     }
     
+    public class CryptopiaOrder: Order {
+
+        override init(json: [String: Any]) {
+            super.init(json: json)
+            self.rate = NSDecimalNumber(json["Rate"])
+            self.amount = NSDecimalNumber(json["Amount"])
+            self.remaining = NSDecimalNumber(json["Remaining"])
+            self.total = NSDecimalNumber(json["Total"])
+            if let market = json["Market"] as? String {
+                let split = market.components(separatedBy: "/")
+                if split.count == 2 {
+                    self.market = CurrencyPair(quantity: Currency(code: split[1]), price: Currency(code: split[0]))
+                }
+            }
+ 
+            self.type = OrderType(rawValue: (json["Type"] as? String) ?? "")
+        }
+    }
     public class CryptopiaCurrency: Currency {
         public var id: Int
         public var symbol: String
@@ -154,12 +172,13 @@ public struct Cryptopia {
     public enum API {
         case getMarkets
         case getBalance
+        case getOpenOrders
         //
         case getCurrencies
         case getTradePairs
     }
     
-    public class Store: ExchangeDataStore<Market, Balance> {
+    public class Store: ExchangeDataStore<Market, Balance, Order> {
         public static var shared = Store()
         
         override private init() {
@@ -170,6 +189,8 @@ public struct Cryptopia {
         
         public var tickersResponse: HTTPURLResponse? = nil
         public var balanceResponse: HTTPURLResponse? = nil
+        public var openOrdersResponse: HTTPURLResponse? = nil
+
         public var currenciesResponse: (response: HTTPURLResponse?, currencies: [CryptopiaCurrency]) = (nil, [])
     }
 
@@ -232,6 +253,22 @@ public struct Cryptopia {
             }
         }
         
+        public func getOpenOrders(completion: @escaping (ResponseType) -> Void) {
+            let apiType = Cryptopia.API.getOpenOrders
+            
+            if apiType.checkInterval(response: store.openOrdersResponse) {
+                completion(.cached)
+            } else {
+                cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
+                    guard let json = json as? [[String: Any]] else { return }
+                    let openOrders = json.map { CryptopiaOrder(json: $0) }
+                    self.store.openOrders = openOrders
+                    self.store.openOrdersResponse = response
+                    completion(.fetched)
+                }.resume()
+            }
+        }
+        
         public func getBalances(completion: @escaping (ResponseType) -> Void) {
             let apiType = Cryptopia.API.getBalance
             
@@ -242,14 +279,12 @@ public struct Cryptopia {
             } else {
                 
                 cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
-                    
                     guard let json = json as? [[String: Any]] else { return }
                     let balances = json.map { Balance(json: $0, currencyStore: self.activeCurrencyStore()) }.filter { $0.available != .zero }
                     self.store.balances = balances
                     self.store.balanceResponse = response
                     completion(.fetched)
-                    
-                    }.resume()
+                }.resume()
             }
         }
         
@@ -322,6 +357,7 @@ extension Cryptopia.API: APIType {
         case .getTradePairs: return "/GetTradePairs"
         case .getMarkets: return "/GetMarkets"
         case .getBalance: return "/GetBalance"
+        case .getOpenOrders: return "/GetOpenOrders"
         }
     }
     
@@ -331,6 +367,7 @@ extension Cryptopia.API: APIType {
         case .getTradePairs: return .GET
         case .getMarkets: return .GET
         case .getBalance: return .POST
+        case .getOpenOrders: return .POST
         }
     }
     
@@ -340,6 +377,7 @@ extension Cryptopia.API: APIType {
         case .getTradePairs: return false
         case .getMarkets: return false
         case .getBalance: return true
+        case .getOpenOrders: return true
         }
     }
     
@@ -349,6 +387,7 @@ extension Cryptopia.API: APIType {
         case .getTradePairs: return .url
         case .getMarkets: return .url
         case .getBalance: return .url
+        case .getOpenOrders: return .url
         }
     }
     
@@ -358,6 +397,7 @@ extension Cryptopia.API: APIType {
         case .getTradePairs: return [:]
         case .getMarkets: return [:]
         case .getBalance: return [:]
+        case .getOpenOrders: return [:]
         }
     }
     
@@ -367,6 +407,7 @@ extension Cryptopia.API: APIType {
         case .getTradePairs: return .aMonth
         case .getMarkets: return .aMinute
         case .getBalance: return .aMinute
+        case .getOpenOrders: return .aMinute
         }
     }
 }

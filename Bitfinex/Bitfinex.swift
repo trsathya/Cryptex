@@ -47,8 +47,8 @@ public struct Bitfinex {
             super.init(currency: currencyStore.forCode(json["currency"] ?? ""), quantity: available)
         }
     }
-    
-    public class Store: ExchangeDataStore<Ticker, Balance> {
+
+    public class Store: ExchangeDataStore<Ticker, Balance, Order> {
         public static var shared = Store()
         
         override private init() {
