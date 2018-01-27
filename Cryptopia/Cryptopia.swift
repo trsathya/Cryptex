@@ -106,6 +106,9 @@ public struct Cryptopia {
 
         override init(json: [String: Any]) {
             super.init(json: json)
+            if let orderId = json["OrderId"] {
+                self.id = String(describing: orderId)
+            }
             self.rate = NSDecimalNumber(json["Rate"])
             self.amount = NSDecimalNumber(json["Amount"])
             self.remaining = NSDecimalNumber(json["Remaining"])
