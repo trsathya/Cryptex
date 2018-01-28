@@ -126,7 +126,12 @@ POST https://api.gemini.com/v1/balances
 BTC: 0.29182653 $3,420.49
 USD: 26.96 $26.96
 ETH: 0.00000017 $0.00
+```
 
+**Note:** While creating Binance service, pass a currency override array to resolve a currency code difference. This is because Binance chose to use the code BCC for BitcoinCash instead of BCH.
+```swift
+let currencyOverrides = ["BCC": Currency(name: "Bitcoin Cash", code: "BCC")]
+let binanceService = Binance.Service(key: key, secret: secret, session: session, userPreference: .USDT_BTC, currencyOverrides: currencyOverrides)
 ```
 
 [badge-pms]: https://img.shields.io/badge/supports-CocoaPods%20%7C%20Carthage%20%7C%20SwiftPM-green.svg
