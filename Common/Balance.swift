@@ -22,7 +22,7 @@ public class Balance: BalanceType, CustomStringConvertible {
     }
     
     public var description: String {
-        return "\n" + currency.code + " : " + quantity.stringValue
+        return currency.code + ": " + quantity.stringValue
     }
 }
 
