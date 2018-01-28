@@ -127,6 +127,10 @@ public extension NSDecimalNumber {
         let num = NumberFormatter.usd.string(from: temp) ?? ""
         return num + suffix
     }
+    
+    var usdFormatted: String? {
+        return NumberFormatter.usd.string(from: self)
+    }
 }
 
 public extension NSDecimalNumberHandler {

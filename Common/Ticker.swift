@@ -36,7 +36,7 @@ extension TickerType {
     }
 }
 
-public class Ticker: TickerType {
+public class Ticker: TickerType, CustomStringConvertible {
     public let symbol: CurrencyPair
     public let price: NSDecimalNumber
     public var priceInUSD = NSDecimalNumber.zero
@@ -48,6 +48,10 @@ public class Ticker: TickerType {
     public init(symbol: CurrencyPair, price: NSDecimalNumber) {
         self.symbol = symbol
         self.price = price
+    }
+    
+    public var description: String {
+        return "\n" + symbol.displaySymbol + " : " + price.stringValue + " " + symbol.price.code
     }
 }
 

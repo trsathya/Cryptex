@@ -12,13 +12,17 @@ public protocol BalanceType {
     var quantity: NSDecimalNumber { get }
 }
 
-public class Balance: BalanceType {
+public class Balance: BalanceType, CustomStringConvertible {
     public let currency: Currency
     public let quantity: NSDecimalNumber
     
     public init(currency: Currency, quantity: NSDecimalNumber) {
         self.currency = currency
         self.quantity = quantity
+    }
+    
+    public var description: String {
+        return "\n" + currency.code + " : " + quantity.stringValue
     }
 }
 
