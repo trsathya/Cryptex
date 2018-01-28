@@ -15,17 +15,17 @@ Cryptex, a single Swift 4 library to access multiple crypto currency exchange AP
 
 To install all exchanges
 ```ruby
-pod 'Cryptex', '~> 0.0.3'
+pod 'Cryptex', '~> 0.0.4'
 ```
 
 To install only one exchange
 ```ruby
-pod 'Cryptex/Gemini', '~> 0.0.3'
+pod 'Cryptex/Gemini', '~> 0.0.4'
 ```
 
 To install two or more exchanges
 ```ruby
-pod 'Cryptex', '~> 0.0.3', :subspecs => ['Gemini', 'GDAX', "Poloniex"]
+pod 'Cryptex', '~> 0.0.4', :subspecs => ['Gemini', 'GDAX', "Poloniex"]
 ```
 
 #### Carthage (iOS 8+, OS X 10.9+)
