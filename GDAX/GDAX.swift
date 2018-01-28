@@ -88,9 +88,8 @@ public struct GDAX {
     }
     
     public class Store: ExchangeDataStore<Ticker, Account> {
-        public static var shared = Store()
         
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "GDAX"
         }
@@ -109,7 +108,7 @@ public struct GDAX {
     public class Service: Network {
         
         private let passphrase: String
-        fileprivate let store = GDAX.Store.shared
+        public let store = Store()
         
         public required init(key: String?, secret: String?, passphrase: String, session: URLSession, userPreference: UserPreference, currencyOverrides: [String: Currency]?) {
             self.passphrase = passphrase

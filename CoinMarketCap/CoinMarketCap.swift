@@ -86,9 +86,8 @@ public struct CoinMarketCap {
     }
     
     public class Store: ExchangeDataStore<CMCTicker, Balance> {
-        public static var shared = Store()
                 
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "CoinMarketCap"
             accountingCurrency = .USD
@@ -99,7 +98,7 @@ public struct CoinMarketCap {
     }
     
     public class Service: Network, TickerServiceType {
-        fileprivate let store = CoinMarketCap.Store.shared
+        public let store = Store()
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = CoinMarketCap.API.getTicker

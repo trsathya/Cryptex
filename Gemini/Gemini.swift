@@ -125,9 +125,8 @@ public struct Gemini {
     }
     
     public class Store: ExchangeDataStore<Ticker, Balance> {
-        public static var shared = Store()
         
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "Gemini"
         }
@@ -167,7 +166,7 @@ public struct Gemini {
     
     public class Service: Network {
         
-        fileprivate let store = Gemini.Store.shared
+        public let store = Store()
         
         public func getSymbols(completion: @escaping (ResponseType) -> Void) {
             let apiType = Gemini.API.symbols

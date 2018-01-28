@@ -156,9 +156,8 @@ public struct Poloniex {
     }
     
     public class Store: ExchangeDataStore<Poloniex.Ticker, Balance> {
-        public static var shared = Store()
         
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "Poloniex"
             accountingCurrency = .USDT
@@ -173,7 +172,7 @@ public struct Poloniex {
     
     public class Service: Network, TickerServiceType {
         
-        fileprivate let store = Poloniex.Store.shared
+        public let store = Store()
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             

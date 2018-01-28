@@ -17,9 +17,8 @@ public extension CurrencyPair {
 public struct Koinex {
     
     public class Store: ExchangeDataStore<Ticker, Balance> {
-        public static var shared = Store()
         
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "Koinex"
             accountingCurrency = .INR
@@ -34,7 +33,7 @@ public struct Koinex {
     
     public class Service: Network, TickerServiceType {
         
-        fileprivate let store = Koinex.Store.shared
+        public let store = Store()
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = Koinex.API.ticker

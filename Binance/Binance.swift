@@ -52,10 +52,8 @@ public struct Binance {
     }
     
     public class Store: ExchangeDataStore<Ticker, Account.Balance> {
-        public static var shared = Store()
         
-        
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "Binance"
             accountingCurrency = .USDT
@@ -72,7 +70,7 @@ public struct Binance {
     
     public class Service: Network, TickerServiceType {
         
-        fileprivate let store = Binance.Store.shared
+        public let store = Store()
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = Binance.API.getAllPrices

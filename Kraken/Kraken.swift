@@ -49,9 +49,8 @@ public struct Kraken {
     }
     
     public class Store: ExchangeDataStore<Ticker, Balance> {
-        public static var shared = Store()
         
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "Kraken"
             accountingCurrency = .USD
@@ -97,7 +96,7 @@ public struct Kraken {
     
     public class Service: Network {
         
-        fileprivate let store = Kraken.Store.shared
+        public let store = Store()
         
         public func getSymbols(completion: @escaping (ResponseType) -> Void) {
             let apiType = Kraken.API.getAssetInfo

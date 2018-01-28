@@ -160,9 +160,8 @@ public struct Cryptopia {
     }
     
     public class Store: ExchangeDataStore<Market, Balance> {
-        public static var shared = Store()
         
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "Cryptopia"
             accountingCurrency = .USDT
@@ -195,7 +194,7 @@ public struct Cryptopia {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        fileprivate let store = Cryptopia.Store.shared
+        public let store = Store()
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = Cryptopia.API.getMarkets

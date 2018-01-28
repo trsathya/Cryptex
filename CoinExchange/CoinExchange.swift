@@ -109,9 +109,8 @@ public struct CoinExchange {
     }
     
     public class Store: ExchangeDataStore<MarketSummary, Balance> {
-        public static var shared = Store()
                 
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "CoinExchange"
             accountingCurrency = .USDT
@@ -123,7 +122,7 @@ public struct CoinExchange {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        fileprivate let store = CoinExchange.Store.shared
+        public let store = Store()
         
         public func getCurrencyPairs(completion: @escaping (ResponseType) -> Void) {
             let apiType = CoinExchange.API.getmarkets

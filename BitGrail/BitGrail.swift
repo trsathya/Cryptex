@@ -73,9 +73,8 @@ public struct BitGrail {
     }
     
     public class Store: ExchangeDataStore<Market, Balance> {
-        public static var shared = Store()
         
-        override private init() {
+        override fileprivate init() {
             super.init()
             name = "BitGrail"
             accountingCurrency = .Bitcoin
@@ -86,7 +85,7 @@ public struct BitGrail {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        fileprivate let store = BitGrail.Store.shared
+        public let store = Store()
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = BitGrail.API.getMarkets
