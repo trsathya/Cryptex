@@ -171,27 +171,6 @@ public struct Cryptopia {
         public var balanceResponse: HTTPURLResponse? = nil
         public var currenciesResponse: (response: HTTPURLResponse?, currencies: [CryptopiaCurrency]) = (nil, [])
     }
-
-    class CurrencyStore: CurrencyStoreType {
-        
-        let currencies: [CryptopiaCurrency]
-        
-        init(currencies: [CryptopiaCurrency]) {
-            self.currencies = currencies
-        }
-        
-        func isKnown(code: String) -> Bool {
-            return currencies.filter { $0.code.lowercased() == code.lowercased() }.count > 0
-        }
-        
-        func forCode(_ code: String) -> Currency {
-            if let currency = (currencies.filter { $0.code.lowercased() == code.lowercased() }).first {
-                return currency
-            } else {
-                return Currency(name: code, code: code)
-            }
-        }
-    }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
         public let store = Store()
