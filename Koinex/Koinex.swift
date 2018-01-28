@@ -41,22 +41,22 @@ public struct Koinex {
             if apiType.checkInterval(response: store.tickerResponse) {
                 completion(.cached)
             } else {
-                dataTaskFor(api: apiType, completion: { (json, httpResponse, error) in
-                    guard let json = json as? [String: Any], let prices = json["prices"] as? [String: Any] else {
+                dataTaskFor(api: apiType, completion: { (response) in
+                    guard let json = response.json as? [String: Any], let prices = json["prices"] as? [String: Any] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
                     var tickers: [Ticker] = []
                     for (key, value) in prices {
-                        let currency = self.userPreference.currencyStore.forCode(key)
-                        let inr = self.userPreference.currencyStore.forCode("inr")
+                        let currency = self.forCode(key)
+                        let inr = self.forCode("inr")
                         let symbol = CurrencyPair(quantity: currency, price: inr)
                         let price = NSDecimalNumber(value)
                         let ticker = Ticker(symbol: symbol, price: price)
                         tickers.append(ticker)
                     }
                     self.store.setTickersInDictionary(tickers: tickers)
-                    self.store.tickerResponse = httpResponse
+                    self.store.tickerResponse = response.httpResponse
                     completion(.fetched)
                 }).resume()
             }

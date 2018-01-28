@@ -195,37 +195,23 @@ public struct Cryptopia {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        private let key: String
-        private let secret: String
         fileprivate let store = Cryptopia.Store.shared
-        var currencyStore: CurrencyStore?
-        
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
-        func activeCurrencyStore() -> CurrencyStoreType {
-            guard let currencyStore = currencyStore else { return userPreference.currencyStore }
-            return currencyStore
-        }
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = Cryptopia.API.getMarkets
             if apiType.checkInterval(response: store.tickersResponse) {
                 completion(.cached)
             } else {
-                cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let tickerArray = json as? [[String: Any]] else { return }
+                cryptopiaDataTaskFor(api: apiType) { (response) in
+                    guard let tickerArray = response.json as? [[String: Any]] else { return }
                     var tickers: [Market] = []
                     for ticker in tickerArray {
-                        let ticker = Market(json: ticker, currencyStore: self.activeCurrencyStore())
+                        let ticker = Market(json: ticker, currencyStore: self)
                         tickers.append(ticker)
                     }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
-                    self.store.tickersResponse = response
+                    self.store.tickersResponse = response.httpResponse
                     completion(.fetched)
                     
                     }.resume()
@@ -241,12 +227,12 @@ public struct Cryptopia {
                 
             } else {
                 
-                cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
+                cryptopiaDataTaskFor(api: apiType) { (response) in
                     
-                    guard let json = json as? [[String: Any]] else { return }
-                    let balances = json.map { Balance(json: $0, currencyStore: self.activeCurrencyStore()) }.filter { $0.available != .zero }
+                    guard let json = response.json as? [[String: Any]] else { return }
+                    let balances = json.map { Balance(json: $0, currencyStore: self) }.filter { $0.available != .zero }
                     self.store.balances = balances
-                    self.store.balanceResponse = response
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                     
                     }.resume()
@@ -259,23 +245,25 @@ public struct Cryptopia {
             if apiType.checkInterval(response: store.currenciesResponse.response) {
                 completion(.cached)
             } else {
-                cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let json = json as? [[String: Any]] else { return }
+                cryptopiaDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [[String: Any]] else { return }
                     let currencies = json.map { CryptopiaCurrency(json: $0) }
                     
-                    self.store.currenciesResponse = (response, currencies)
-                    self.currencyStore = CurrencyStore(currencies: currencies)
+                    self.store.currenciesResponse = (response.httpResponse, currencies)
+                    self.apiCurrencyOverrides = Currency.dictionary(array: currencies)
                     completion(.fetched)
                     
                     }.resume()
             }
         }
         
-        func cryptopiaDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
-                guard let json = json as? [String: Any] else { return }
+        func cryptopiaDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
+                guard let json = response.json as? [String: Any] else { return }
                 if let success = json["Success"] as? Bool, let jsonData = json["Data"], success == true {
-                    completion?(jsonData, httpResponse, error)
+                    var tempResponse = response
+                    tempResponse.json = jsonData
+                    completion?(tempResponse)
                 } else {
                     // Handle error here
                     if let message = json["Message"] {
@@ -290,7 +278,7 @@ public struct Cryptopia {
         
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 if let url = mutableURLRequest.url?.absoluteString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed),
                     let data = api.postData.data, let string = data.string {
                     api.print("Request Data: \(string)", content: .response)

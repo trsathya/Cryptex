@@ -173,16 +173,8 @@ public struct Poloniex {
     
     public class Service: Network, TickerServiceType {
         
-        private let key: String
-        private let secret: String
         fileprivate let store = Poloniex.Store.shared
         
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             
             let apiType = Poloniex.PublicAPI.returnTicker
@@ -190,18 +182,18 @@ public struct Poloniex {
             if apiType.checkInterval(response: store.tickerResponse) {
                 completion(.cached)
             } else {
-                poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+                poloniexDataTaskFor(api: apiType) { (response) in
                     
-                    guard let json = json as? [String: Any] else { return }
+                    guard let json = response.json as? [String: Any] else { return }
                     
                     var date = Date()
-                    if let dateString = httpResponse?.allHeaderFields["Date"] as? String, let parsedDate = DateFormatter.httpHeader.date(from: dateString) {
+                    if let dateString = response.httpResponse?.allHeaderFields["Date"] as? String, let parsedDate = DateFormatter.httpHeader.date(from: dateString) {
                         date = parsedDate
                     }
-                    let tickers = json.flatMap { Poloniex.Ticker(json: $0.value, symbol: CurrencyPair(poloniexSymbol: $0.key, currencyStore: self.userPreference.currencyStore), timestamp: date) }
+                    let tickers = json.flatMap { Poloniex.Ticker(json: $0.value, symbol: CurrencyPair(poloniexSymbol: $0.key, currencyStore: self), timestamp: date) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
-                    self.store.tickerResponse = httpResponse
+                    self.store.tickerResponse = response.httpResponse
                     completion(.fetched)
                     }.resume()
             }
@@ -214,10 +206,10 @@ public struct Poloniex {
             if apiType.checkInterval(response: store.balanceResponse) {
                 completion(.cached)
             } else {
-                poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+                poloniexDataTaskFor(api: apiType) { (response) in
                     
-                    guard let dictionary = json as? [String: String] else {
-                        completion(.error)
+                    guard let dictionary = response.json as? [String: String] else {
+                        completion(.unexpected(response))
                         return
                     }
                     
@@ -226,10 +218,10 @@ public struct Poloniex {
                     var balances: [Balance] = []
                     filtered.forEach { (arg) in
                         let (key, value) = arg
-                        balances.append(Balance(currency: self.userPreference.currencyStore.forCode(key), quantity: NSDecimalNumber(string: value)))
+                        balances.append(Balance(currency: self.forCode(key), quantity: NSDecimalNumber(string: value)))
                     }
                     self.store.balances = balances
-                    self.store.balanceResponse = httpResponse
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                     }.resume()
             }
@@ -242,21 +234,21 @@ public struct Poloniex {
             if apiType.checkInterval(response: store.pastTradesResponse.response) {
                 completion(.cached)
             } else {
-                poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    guard let json = json as? [String: [[String: Any]]] else {
+                poloniexDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [String: [[String: Any]]] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
                     var trades: [String: [Poloniex.PastTrade]] = [:]
                     json.forEach { key, value in
-                        let currencyPair = CurrencyPair(poloniexSymbol: key, currencyStore: self.userPreference.currencyStore)
+                        let currencyPair = CurrencyPair(poloniexSymbol: key, currencyStore: self)
                         var tradesArray: [Poloniex.PastTrade] = []
                         value.forEach { tradeJson in
                             tradesArray.append(Poloniex.PastTrade(json: tradeJson))
                         }
                         trades[currencyPair.displaySymbol] = tradesArray
                     }
-                    self.store.pastTradesResponse = (httpResponse, trades)
+                    self.store.pastTradesResponse = (response.httpResponse, trades)
                     completion(.fetched)
                     }.resume()
             }
@@ -269,12 +261,12 @@ public struct Poloniex {
             if apiType.checkInterval(response: store.feeInfoResponse.response) {
                 completion(.cached)
             } else {
-                poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    guard let json = json as? [String: Any] else {
-                        completion(.noResponse)
+                poloniexDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [String: Any] else {
+                        completion(.unexpected(response))
                         return
                     }
-                    self.store.feeInfoResponse = (httpResponse, Poloniex.FeeInfo(json: json))
+                    self.store.feeInfoResponse = (response.httpResponse, Poloniex.FeeInfo(json: json))
                     completion(.fetched)
                     }.resume()
             }
@@ -283,26 +275,26 @@ public struct Poloniex {
         public func returnDepositsWithdrawals(start: Date, end: Date, completion: @escaping (ResponseType) -> Void) {
             let apiType = Poloniex.PrivateAPI.returnDepositsWithdrawals(start, end)
             
-            poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+            poloniexDataTaskFor(api: apiType) { (response) in
                 
-                guard let json = json as? [String: Any] else {
-                    completion(.noResponse)
+                guard let json = response.json as? [String: Any] else {
+                    completion(.unexpected(response))
                     return
                 }
                 var deposits: [Poloniex.Deposit] = []
                 if let array = json["deposits"] as? [[String: Any]] {
                     deposits = array.flatMap { item -> Poloniex.Deposit? in
-                        return Poloniex.Deposit(json: item, currencyStore: self.userPreference.currencyStore)
+                        return Poloniex.Deposit(json: item, currencyStore: self)
                     }
                 }
                 var withdrawals: [Poloniex.Withdrawal] = []
                 if let array = json["withdrawals"] as? [[String: Any]] {
                     withdrawals = array.flatMap { item -> Poloniex.Withdrawal? in
-                        return Poloniex.Withdrawal(json: item, currencyStore: self.userPreference.currencyStore)
+                        return Poloniex.Withdrawal(json: item, currencyStore: self)
                     }
                 }
                 
-                self.store.depositsWithdrawalsResponse = (httpResponse, deposits, withdrawals)
+                self.store.depositsWithdrawalsResponse = (response.httpResponse, deposits, withdrawals)
                 completion(.fetched)
                 }.resume()
         }
@@ -311,30 +303,30 @@ public struct Poloniex {
             
             let apiType = Poloniex.PrivateAPI.returnAvailableAccountBalances
             
-            poloniexDataTaskFor(api: apiType) { (json, httpResponse, error) in
+            poloniexDataTaskFor(api: apiType) { (response) in
                 
                 }.resume()
         }
         
-        func poloniexDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
+        func poloniexDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
                 
-                if let json = json as? [String: String], let error = json["error"] {
+                if let json = response.json as? [String: String], let error = json["error"] {
                     
                     if let startRange = error.range(of: "Nonce must be greater than "), let endRange = error.range(of: ". You provided "), self.isMock == false {
-                        let nonce = Int(error.substring(with: startRange.upperBound..<endRange.lowerBound))
+                        let nonce = Int(error[startRange.upperBound..<endRange.lowerBound])
                         print("Setting nonce \(nonce ?? 0) from api error")
                     }
                     print("Poloniex error: %@", error)
                 }
-                completion?(json, httpResponse, error)
+                completion?(response)
             }
         }
         
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
             
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 
                 var postDataDictionary = api.postData
                 postDataDictionary["nonce"] = "\(getTimestampInSeconds())"

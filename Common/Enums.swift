@@ -26,8 +26,7 @@ public enum LogLevel: UInt8 {
 public enum ResponseType {
     case fetched
     case cached
-    case noResponse
-    case error
+    case unexpected(Response)
 }
 
 public enum TransactionType: String {

@@ -97,28 +97,20 @@ public struct Kraken {
     
     public class Service: Network {
         
-        private let key: String
-        private let secret: String
         fileprivate let store = Kraken.Store.shared
-        
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
         
         public func getSymbols(completion: @escaping (ResponseType) -> Void) {
             let apiType = Kraken.API.getAssetInfo
             if apiType.checkInterval(response: store.symbolsResponse.response) {
                 completion(.cached)
             } else {
-                krakenDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let stringArray = json as? [String] else {
-                        completion(.noResponse)
+                krakenDataTaskFor(api: apiType, completion: { (response) in
+                    guard let stringArray = response.json as? [String] else {
+                        completion(.unexpected(response))
                         return
                     }
-                    let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self.userPreference.currencyStore) }
-                    self.store.symbolsResponse = (response, geminiSymbols)
+                    let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self) }
+                    self.store.symbolsResponse = (response.httpResponse, geminiSymbols)
                     completion(.fetched)
                 }).resume()
             }
@@ -129,13 +121,13 @@ public struct Kraken {
             if apiType.checkInterval(response: store.tickerResponse[symbol.displaySymbol]) {
                 completion(symbol, .cached)
             } else {
-                krakenDataTaskFor(api: apiType, completion: { (json, response, error) in
-                    guard let json = json as? [String: String] else {
-                        completion(symbol, .noResponse)
+                krakenDataTaskFor(api: apiType, completion: { (response) in
+                    guard let json = response.json as? [String: String] else {
+                        completion(symbol, .unexpected(response))
                         return
                     }
                     self.store.setTicker(ticker: Ticker(json: json, for: symbol), symbol: symbol.displaySymbol)
-                    self.store.tickerResponse[symbol.displaySymbol] = response
+                    self.store.tickerResponse[symbol.displaySymbol] = response.httpResponse
                     completion(symbol, .fetched)
                 }).resume()
             }
@@ -146,33 +138,33 @@ public struct Kraken {
             if apiType.checkInterval(response: store.balanceResponse) {
                 completion(.cached)
             } else {
-                krakenDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    guard let json = json as? [[String: String]] else {
+                krakenDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [[String: String]] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
                     var balances: [Balance] = []
                     json.forEach({ (dictionary) in
-                        balances.append(Balance(json: dictionary, currencyStore: self.userPreference.currencyStore))
+                        balances.append(Balance(json: dictionary, currencyStore: self))
                     })
                     self.store.balances = balances
-                    self.store.balanceResponse = httpResponse
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                     }.resume()
             }
         }
         
-        private func krakenDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
+        private func krakenDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
                 // Handle error here
-                completion?(json, httpResponse, error)
+                completion?(response)
             }
         }
         
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
             
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 
                 var postDataDictionary = api.postData
                 

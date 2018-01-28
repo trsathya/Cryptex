@@ -86,34 +86,26 @@ public struct BitGrail {
     }
     
     public class Service: Network, TickerServiceType, BalanceServiceType {
-        private let key: String
-        private let secret: String
         fileprivate let store = BitGrail.Store.shared
         
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = BitGrail.API.getMarkets
             if apiType.checkInterval(response: store.tickersResponse) {
                 completion(.cached)
             } else {
-                bitGrailDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let markets = json as? [String: Any] else { return }
+                bitGrailDataTaskFor(api: apiType) { (response) in
+                    guard let markets = response.json as? [String: Any] else { return }
                     
                     var tickers: [Market] = []
                     markets.forEach({ (keyValue) in
                         if let tickersArray = keyValue.value as? [[String: String]] {
                             for tickerJSON in tickersArray {
-                                tickers.append(Market(json: tickerJSON, currencyStore: self.userPreference.currencyStore))
+                                tickers.append(Market(json: tickerJSON, currencyStore: self))
                             }
                         }
                     })
                     self.store.setTickersInDictionary(tickers: tickers)
-                    self.store.tickersResponse = response
+                    self.store.tickersResponse = response.httpResponse
                     completion(.fetched)
                     }.resume()
             }
@@ -128,29 +120,31 @@ public struct BitGrail {
                 
             } else {
                 
-                bitGrailDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let balancesJSON = json as? [String: Any] else { return }
+                bitGrailDataTaskFor(api: apiType) { (response) in
+                    guard let balancesJSON = response.json as? [String: Any] else { return }
                     
                     var balances: [Balance] = []
                     balancesJSON.forEach({ (arg) in
                         guard let value = arg.value as? [String: String] else { return }
-                        let currency = self.userPreference.currencyStore.forCode(arg.key)
+                        let currency = self.forCode(arg.key)
                         balances.append(Balance(json: value, currency: currency))
                     })
 
                     self.store.balances = balances
-                    self.store.balanceResponse = response
+                    self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
                     
                     }.resume()
             }
         }
         
-        func bitGrailDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
-                guard let json = json as? [String: Any] else { return }
+        func bitGrailDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
+                guard let json = response.json as? [String: Any] else { return }
                 if let success = json["success"] as? Int, let jsonData = json["response"], success == 1 {
-                    completion?(jsonData, httpResponse, error)
+                    var tempResponse = response
+                    tempResponse.json = jsonData
+                    completion?(tempResponse)
                 } else {
                     // Handle error here
                 }
@@ -159,7 +153,7 @@ public struct BitGrail {
         
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 var postData = api.postData
                 postData["nonce"] = "\(Int(Date().timeIntervalSince1970 * 1000))"
                 let requestString = postData.queryString

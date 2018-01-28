@@ -72,24 +72,16 @@ public struct Binance {
     
     public class Service: Network, TickerServiceType {
         
-        private let key: String
-        private let secret: String
         fileprivate let store = Binance.Store.shared
         
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
-                
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = Binance.API.getAllPrices
             if apiType.checkInterval(response: store.tickersResponse) {
                 completion(.cached)
             } else {
-                binanceDataTaskFor(api: apiType, completion: { (json, httpResponse, error) in
+                binanceDataTaskFor(api: apiType, completion: { (response) in
                     guard
-                        let tickerArray = json as? [[String: String]]
+                        let tickerArray = response.json as? [[String: String]]
                         else {
                             print("Error: Cast Failed in \(#function)")
                             return
@@ -97,13 +89,13 @@ public struct Binance {
                     
                     var tickers: [Ticker] = []
                     for ticker in tickerArray {
-                        let currencyPair = CurrencyPair(symbol: ticker["symbol"] ?? "", currencyStore: self.userPreference.currencyStore)
+                        let currencyPair = CurrencyPair(symbol: ticker["symbol"] ?? "", currencyStore: self)
                         let price = NSDecimalNumber(string: ticker["price"])
                         let ticker = Ticker(symbol: currencyPair, price: price)
                         tickers.append(ticker)
                     }
                     self.store.setTickersInDictionary(tickers: tickers)
-                    self.store.tickersResponse = httpResponse
+                    self.store.tickersResponse = response.httpResponse
                     completion(.fetched)
                     
                 }).resume()
@@ -115,33 +107,32 @@ public struct Binance {
             if apiType.checkInterval(response: store.accountResponse.response) {
                 completion(.cached)
             } else {
-                binanceDataTaskFor(api: apiType) { (json, httpResponse, error) in
-                    guard let json = json as? [String: Any] else {
+                binanceDataTaskFor(api: apiType) { (response) in
+                    guard let json = response.json as? [String: Any] else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
-                    let account = Binance.Account(json: json, currencyStore: self.userPreference.currencyStore)
+                    let account = Binance.Account(json: json, currencyStore: self)
                     if let balances = account?.balances {
                         self.store.balances = balances
                     }
-                    self.store.accountResponse = (httpResponse, account)
+                    self.store.accountResponse = (response.httpResponse, account)
                     completion(.fetched)
                     }.resume()
             }
         }
         
-        func binanceDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
+        func binanceDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
                 // Handle error here
-                api.print(json, content: .response)
-                completion?(json, httpResponse, error)
+                completion?(response)
             }
         }
         
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
             
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 
                 var postData = api.postData
                 postData["recvWindow"] = "5000"

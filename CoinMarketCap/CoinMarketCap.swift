@@ -99,28 +99,20 @@ public struct CoinMarketCap {
     }
     
     public class Service: Network, TickerServiceType {
-        private let key: String
-        private let secret: String
         fileprivate let store = CoinMarketCap.Store.shared
-        
-        public required init(key: String, secret: String, session: URLSession, userPreference: UserPreference) {
-            self.key = key
-            self.secret = secret
-            super.init(session: session, userPreference: userPreference)
-        }
         
         public func getTickers(completion: @escaping (ResponseType) -> Void) {
             let apiType = CoinMarketCap.API.getTicker
             if apiType.checkInterval(response: store.tickerResponse.response) {
                 completion(.cached)
             } else {
-                coinExchangeDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let marketSummaries = json as? [[String: String]] else { return }
+                coinExchangeDataTaskFor(api: apiType) { (response) in
+                    guard let marketSummaries = response.json as? [[String: String]] else { return }
                     
                     let tickers: [CMCTicker] = marketSummaries.flatMap { CMCTicker(json: $0) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
-                    self.store.tickerResponse = (response, tickers)
+                    self.store.tickerResponse = (response.httpResponse, tickers)
                     completion(.fetched)
                     }.resume()
             }
@@ -131,23 +123,23 @@ public struct CoinMarketCap {
             if apiType.checkInterval(response: store.globalMarketDataResponse.response) {
                 completion(.cached)
             } else {
-                coinExchangeDataTaskFor(api: apiType) { (json, response, error) in
-                    guard let global = json as? [String: Any] else { return }
-                    self.store.globalMarketDataResponse = (response, GlobalMarketData(json: global))
+                coinExchangeDataTaskFor(api: apiType) { (response) in
+                    guard let global = response.json as? [String: Any] else { return }
+                    self.store.globalMarketDataResponse = (response.httpResponse, GlobalMarketData(json: global))
                     completion(.fetched)
                     }.resume()
             }
         }
         
-        func coinExchangeDataTaskFor(api: APIType, completion: ((Any?, HTTPURLResponse?, Error?) -> Void)?) -> URLSessionDataTask {
-            return dataTaskFor(api: api) { (json, httpResponse, error) in
-                completion?(json, httpResponse, error)
+        func coinExchangeDataTaskFor(api: APIType, completion: ((Response) -> Void)?) -> URLSessionDataTask {
+            return dataTaskFor(api: api) { (response) in
+                completion?(response)
             }
         }
         
         public override func requestFor(api: APIType) -> NSMutableURLRequest {
             let mutableURLRequest = api.mutableRequest
-            if api.authenticated {
+            if let key = key, let secret = secret, api.authenticated {
                 var postData = api.postData
                 postData["nonce"] = "\(Int(Date().timeIntervalSince1970 * 1000))"
                 let requestString = postData.queryString
