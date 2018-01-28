@@ -250,7 +250,7 @@ public struct Cryptopia {
                     let currencies = json.map { CryptopiaCurrency(json: $0) }
                     
                     self.store.currenciesResponse = (response.httpResponse, currencies)
-                    self.currencyOverrides = Currency.dictionary(array: currencies)
+                    self.apiCurrencyOverrides = Currency.dictionary(array: currencies)
                     completion(.fetched)
                     
                     }.resume()

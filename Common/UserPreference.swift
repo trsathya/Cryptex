@@ -18,6 +18,9 @@ public struct UserPreference {
         self.crypto = crypto
         self.ignoredFiats = ignoredFiats
     }
+    
+    public static let USD_BTC = UserPreference(fiat: .USD, crypto: .Bitcoin, ignoredFiats: [])
+    public static let USDT_BTC = UserPreference(fiat: .USDT, crypto: .Bitcoin, ignoredFiats: [])
 }
 
 public struct Accounting<T: TickerType> {

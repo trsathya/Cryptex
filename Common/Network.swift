@@ -38,6 +38,7 @@ open class Network {
     private let nonceQueue = DispatchQueue(label: "com.sathyakumar.cryptex.network.nonce")
     public let userPreference: UserPreference
     var currencyOverrides: [String: Currency]?
+    var apiCurrencyOverrides: [String: Currency]?
     
     public var isMock: Bool {
         return session is MockURLSession
@@ -93,7 +94,9 @@ open class Network {
 extension Network: CurrencyStoreType {
     public func isKnown(code: String) -> Bool {
         let uppercased = code.uppercased()
-        if let overrides = currencyOverrides, let _ = overrides[uppercased] {
+        if let overrides = apiCurrencyOverrides, let _ = overrides[uppercased] {
+            return true
+        } else if let overrides = currencyOverrides, let _ = overrides[uppercased] {
             return true
         } else if let _ = Currency.currencyLookupDictionary[uppercased] {
             return true
@@ -104,7 +107,9 @@ extension Network: CurrencyStoreType {
     
     public func forCode(_ code: String) -> Currency {
         let uppercased = code.uppercased()
-        if let overrides = currencyOverrides, let currency = overrides[uppercased] {
+        if let overrides = apiCurrencyOverrides, let currency = overrides[uppercased] {
+            return currency
+        } else if let overrides = currencyOverrides, let currency = overrides[uppercased] {
             return currency
         } else if let currency = Currency.currencyLookupDictionary[uppercased] {
             return currency
