@@ -179,6 +179,7 @@ public struct Cryptopia {
         //
         case getCurrencies
         case getTradePairs
+        case submitTrade(parameters: [String: String])
     }
     
     public class Store: ExchangeDataStore<Market, Balance, Order> {
@@ -193,7 +194,7 @@ public struct Cryptopia {
         public var tickersResponse: HTTPURLResponse? = nil
         public var balanceResponse: HTTPURLResponse? = nil
         public var openOrdersResponse: HTTPURLResponse? = nil
-
+        public var submitTrade: HTTPURLResponse? = nil
         public var currenciesResponse: (response: HTTPURLResponse?, currencies: [CryptopiaCurrency]) = (nil, [])
     }
 
@@ -254,6 +255,15 @@ public struct Cryptopia {
                     
                     }.resume()
             }
+        }
+        
+        public func submitTrade(parameters: [String:String], completion: @escaping (ResponseType, [[String: Any]], Error?) -> Void) {
+            let apiType = Cryptopia.API.submitTrade(parameters: parameters)
+            cryptopiaDataTaskFor(api: apiType) { (json, response, error) in
+                guard let json = json as? [[String: Any]] else { return }
+                self.store.openOrdersResponse = response
+                completion(.fetched, json, error)
+            }.resume()
         }
         
         public func getOpenOrders(completion: @escaping (ResponseType) -> Void) {
@@ -361,6 +371,7 @@ extension Cryptopia.API: APIType {
         case .getMarkets: return "/GetMarkets"
         case .getBalance: return "/GetBalance"
         case .getOpenOrders: return "/GetOpenOrders"
+        case .submitTrade: return "SubmitTrade"
         }
     }
     
@@ -371,6 +382,7 @@ extension Cryptopia.API: APIType {
         case .getMarkets: return .GET
         case .getBalance: return .POST
         case .getOpenOrders: return .POST
+        case .submitTrade: return .POST
         }
     }
     
@@ -381,6 +393,7 @@ extension Cryptopia.API: APIType {
         case .getMarkets: return false
         case .getBalance: return true
         case .getOpenOrders: return true
+        case .submitTrade: return true
         }
     }
     
@@ -391,6 +404,7 @@ extension Cryptopia.API: APIType {
         case .getMarkets: return .url
         case .getBalance: return .url
         case .getOpenOrders: return .url
+        case .submitTrade: return .url
         }
     }
     
@@ -401,6 +415,7 @@ extension Cryptopia.API: APIType {
         case .getMarkets: return [:]
         case .getBalance: return [:]
         case .getOpenOrders: return [:]
+        case .submitTrade(let parameters): return parameters
         }
     }
     
@@ -411,6 +426,7 @@ extension Cryptopia.API: APIType {
         case .getMarkets: return .aMinute
         case .getBalance: return .aMinute
         case .getOpenOrders: return .aMinute
+        case .submitTrade: return .aMinute
         }
     }
 }
