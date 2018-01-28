@@ -31,14 +31,14 @@ pod 'Cryptex', '~> 0.0.3', :subspecs => ['Gemini', 'GDAX', "Poloniex"]
 #### Carthage (iOS 8+, OS X 10.9+)
 
 ```
-github "trsathya/Cryptex" ~> 0.0.3
+github "trsathya/Cryptex" ~> 0.0.4
 ```
 
 #### Swift Package Manager
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/trsathya/Cryptex.git", from: "0.0.3"),
+    .Package(url: "https://github.com/trsathya/Cryptex.git", from: "0.0.4"),
 ]
 ```
 
