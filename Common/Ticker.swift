@@ -10,40 +10,38 @@ import Foundation
 public protocol TickerType: Comparable {
     var symbol: CurrencyPair { get }
     var price: NSDecimalNumber { get }
-    var priceInUSD: NSDecimalNumber { get set }
-    var priceInBTC: NSDecimalNumber { get set }
-    var priceInETH: NSDecimalNumber { get set }
-    var priceInLTC: NSDecimalNumber { get set }
-    var priceInXRP: NSDecimalNumber { get set }
+    var priceInOtherCurencies: [Currency: NSDecimalNumber]? { get set }
+    var accountingCurrency: Currency { get set }
 }
 
 extension TickerType {
     
-    public var formattedPriceInUSD: String {
-        return NumberFormatter.usd.string(from: priceInUSD) ?? ""
+    var name: String {
+        return symbol.quantity.name
+    }
+    
+    func price(in currency: Currency) -> NSDecimalNumber {
+        return priceInOtherCurencies?[currency] ?? .zero
     }
     
     public static func <(lhs: Self, rhs: Self) -> Bool {
-        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedAscending
+        return lhs.price(in: lhs.accountingCurrency).compare(rhs.price(in: rhs.accountingCurrency)) == .orderedAscending
     }
     
     public static func >(lhs: Self, rhs: Self) -> Bool {
-        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedDescending
+        return lhs.price(in: lhs.accountingCurrency).compare(rhs.price(in: rhs.accountingCurrency)) == .orderedDescending
     }
     
     public static func ==(lhs: Self, rhs: Self) -> Bool {
-        return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedSame
+        return lhs.price(in: lhs.accountingCurrency).compare(rhs.price(in: rhs.accountingCurrency)) == .orderedSame
     }
 }
 
 public class Ticker: TickerType, CustomStringConvertible {
     public let symbol: CurrencyPair
     public let price: NSDecimalNumber
-    public var priceInUSD = NSDecimalNumber.zero
-    public var priceInBTC = NSDecimalNumber.zero
-    public var priceInETH = NSDecimalNumber.zero
-    public var priceInLTC = NSDecimalNumber.zero
-    public var priceInXRP = NSDecimalNumber.zero
+    public var priceInOtherCurencies: [Currency: NSDecimalNumber]? = [:]
+    public var accountingCurrency: Currency = .USD
     
     public init(symbol: CurrencyPair, price: NSDecimalNumber) {
         self.symbol = symbol
@@ -58,13 +56,13 @@ public class Ticker: TickerType, CustomStringConvertible {
 public protocol DisplayableTickerType {
     var name: String { get }
     var price: String { get }
-    var priceInUSD: String { get }
+    var formattedPriceInAccountingCurrency: String { get }
 }
 
 public struct DisplayableTicker: DisplayableTickerType {
     public var name: String
     public var price: String
-    public var priceInUSD: String
+    public var formattedPriceInAccountingCurrency: String
 }
 
 public protocol TickerTableViewDataSource {

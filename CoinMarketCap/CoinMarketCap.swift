@@ -30,8 +30,8 @@ public struct CoinMarketCap {
             super.init(symbol: currencyPair, price: priceUSD)
             id = json["id"] as? String ?? ""
             rank = json["rank"] as? String ?? ""
-            priceInUSD = priceUSD
-            priceInBTC = NSDecimalNumber(json["price_btc"])
+            priceInOtherCurencies?[Currency.USD] = priceUSD
+            priceInOtherCurencies?[Currency.Bitcoin] = NSDecimalNumber(json["price_btc"])
             volume24Hrs = NSDecimalNumber(json["24h_volume_usd"])
             marketCap = NSDecimalNumber(json["market_cap_usd"])
             availableSupply = NSDecimalNumber(json["available_supply"])

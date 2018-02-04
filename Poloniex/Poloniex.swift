@@ -54,19 +54,7 @@ public struct Poloniex {
             quoteVolume = NSDecimalNumber(json["quoteVolume"])
             baseVolume = NSDecimalNumber(json["baseVolume"])
             isFrozen = json["isFrozen"] as? Bool
-        }
-        
-        public static func <(lhs: Ticker, rhs: Ticker) -> Bool {
-            return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedAscending
-        }
-        
-        public static func >(lhs: Ticker, rhs: Ticker) -> Bool {
-            return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedDescending
-        }
-        
-        public static func ==(lhs: Ticker, rhs: Ticker) -> Bool {
-            return lhs.priceInUSD.compare(rhs.priceInUSD) == .orderedSame
-        }
+        }        
     }
     
     public struct PastTrade {

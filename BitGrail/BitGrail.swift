@@ -34,7 +34,7 @@ public struct BitGrail {
         public var bid = NSDecimalNumber.zero
         public var ask = NSDecimalNumber.zero
         
-        public init(json: [String: Any], currencyStore: CurrencyStoreType) {
+        public init(json: [String: Any], currencyPair: CurrencyPair) {
             
             market = json["market"] as? String ?? ""
             last = NSDecimalNumber(json["last"])
@@ -44,7 +44,7 @@ public struct BitGrail {
             coinVolume = NSDecimalNumber(json["coinVolume"])
             ask = NSDecimalNumber(json["ask"])
             bid = NSDecimalNumber(json["bid"])
-            super.init(symbol: CurrencyPair(bitGrailLabel: market, currencyStore: currencyStore), price: last)
+            super.init(symbol: currencyPair, price: last)
         }
     }
     
@@ -97,9 +97,10 @@ public struct BitGrail {
                     
                     var tickers: [Market] = []
                     markets.forEach({ (keyValue) in
-                        if let tickersArray = keyValue.value as? [[String: String]] {
-                            for tickerJSON in tickersArray {
-                                tickers.append(Market(json: tickerJSON, currencyStore: self))
+                        if let tickersDictionary = keyValue.value as? [String: Any], let markets = tickersDictionary["markets"] as? [String: [String: String]] {
+                            for market in markets {
+                                let currencyPair = CurrencyPair(bitGrailLabel: market.key, currencyStore: self)
+                                tickers.append(Market(json: market.value, currencyPair: currencyPair))
                             }
                         }
                     })
@@ -126,7 +127,10 @@ public struct BitGrail {
                     balancesJSON.forEach({ (arg) in
                         guard let value = arg.value as? [String: String] else { return }
                         let currency = self.forCode(arg.key)
-                        balances.append(Balance(json: value, currency: currency))
+                        let balance = Balance(json: value, currency: currency)
+                        if balance.quantity != .zero {
+                            balances.append(balance)
+                        }
                     })
 
                     self.store.balances = balances
@@ -145,7 +149,7 @@ public struct BitGrail {
                     tempResponse.json = jsonData
                     completion?(tempResponse)
                 } else {
-                    // Handle error here
+                    api.print(response.string, content: .response)
                 }
             }
         }
@@ -175,7 +179,7 @@ public struct BitGrail {
 
 extension BitGrail.API: APIType {
     public var host: String {
-        return "https://bitgrail.com/api/"
+        return "https://api.bitgrail.com/"
     }
     
     public var path: String {

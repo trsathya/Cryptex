@@ -32,7 +32,7 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
             }
             tickerByQuantityCCY = byQuantityCCY.values.sorted(by: { (leftArray, rightArray) -> Bool in
                 guard let left = leftArray.first, let right = rightArray.first else { return false }
-                return left.priceInUSD.compare(right.priceInUSD) == .orderedDescending
+                return left.price(in: accountingCurrency).compare(right.price(in: accountingCurrency)) == .orderedDescending
             })
             tickerByPriceCCY = byPriceCCY.keys.flatMap { byPriceCCY[$0] }
             tickerByName = tickers.sorted(by: { (left, right) -> Bool in
@@ -43,25 +43,33 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
 
     private func setPriceInUSD(tickers: [T]) -> [T] {
         return tickers.map({ (ticker) -> T in
+            var t = ticker
             if ticker.symbol.price == accountingCurrency {
-                var t = ticker
-                t.priceInUSD = ticker.price
+                if (t.priceInOtherCurencies?[accountingCurrency] = ticker.price) == nil {
+                    t.priceInOtherCurencies = [accountingCurrency: ticker.price]
+                    t.accountingCurrency = self.accountingCurrency
+                }
                 return t
             } else if let usdPrice = tickers.filter({
                 return $0.symbol == CurrencyPair(quantity: ticker.symbol.price, price: accountingCurrency) }).first?.price
             {
-                var t = ticker
-                t.priceInUSD = usdPrice.multiplying(by: ticker.price)
+                let priceInOtherCurrency = usdPrice.multiplying(by: ticker.price)
+                if (t.priceInOtherCurencies?[accountingCurrency] = priceInOtherCurrency) == nil {
+                    t.priceInOtherCurencies = [accountingCurrency: priceInOtherCurrency]
+                    t.accountingCurrency = self.accountingCurrency
+                }
+                return t
+            } else {
+                t.accountingCurrency = self.accountingCurrency
                 return t
             }
-            return ticker
         })
     }
     
     public func setTicker(ticker: T, symbol: String) {
         var temp = tickersDictionary
         temp[symbol] = ticker
-        setTickersInDictionary(tickers: setPriceInUSD(tickers: temp.values.flatMap{$0}))
+        setTickersInDictionary(tickers: temp.values.flatMap{$0})
     }
     
     public func setTickersInDictionary(tickers: [T]) {
@@ -71,14 +79,14 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
         tickersDictionary = dictionary
     }
     
-    public func balanceInPreferredCurrency(balance: BalanceType) -> NSDecimalNumber {
+    public func balanceInAccountingCurrency(balance: BalanceType) -> NSDecimalNumber? {
         
         let fiatCurrencyPair = CurrencyPair(quantity: balance.currency, price: accountingCurrency)
         let cryptoCurrencyPair = CurrencyPair(quantity: balance.currency, price: commonCurrency)
         if let ticker = (tickerByName.filter {$0.symbol == fiatCurrencyPair}).first {
-            return balance.quantity.multiplying(by: ticker.priceInUSD)
+            return balance.quantity.multiplying(by: ticker.price(in: accountingCurrency))
         } else if let ticker = (tickerByName.filter {$0.symbol == cryptoCurrencyPair}).first {
-            return balance.quantity.multiplying(by: ticker.priceInUSD)
+            return balance.quantity.multiplying(by: ticker.price(in: accountingCurrency))
         } else {
             return balance.quantity
         }
@@ -123,8 +131,12 @@ extension ExchangeDataStore: TickerTableViewDataSource {
     }
     public func displayableTicker(section: Int, row: Int, viewType: TickerViewType) -> DisplayableTickerType? {
         guard let t = ticker(section: section, row: row, viewType: viewType) else { return nil }
-        let displayable = DisplayableTicker(name: t.symbol.quantity.name, price: displayablePrice(ticker: t), priceInUSD: t.formattedPriceInUSD)
-        return displayable
+        
+        var formattedPriceInAccountingCurrency = ""
+        if let priceInUSD = t.priceInOtherCurencies?[accountingCurrency] {
+            formattedPriceInAccountingCurrency = accountingCurrency.formatted(number: priceInUSD)
+        }
+        return DisplayableTicker(name: t.name, price: displayablePrice(ticker: t), formattedPriceInAccountingCurrency: formattedPriceInAccountingCurrency)
     }
 }
 
@@ -132,7 +144,11 @@ extension ExchangeDataStore: BalanceTableViewDataSource {
     
     public func getTotalBalance() -> NSDecimalNumber {
         var totalBalance = NSDecimalNumber.zero
-        balances.forEach { totalBalance = totalBalance.adding(balanceInPreferredCurrency(balance: $0)) }
+        balances.forEach { (balance) in
+            if let balanceInAccountingCurrency = balanceInAccountingCurrency(balance: balance) {
+                totalBalance = totalBalance.adding(balanceInAccountingCurrency)
+            }
+        }
         return totalBalance
     }
     
@@ -142,9 +158,9 @@ extension ExchangeDataStore: BalanceTableViewDataSource {
     
     public func displayableBalance(row: Int) -> DisplayableBalanceType {
         let balance = balances[row]
-        let balanceInPreferredCurrency = self.balanceInPreferredCurrency(balance: balance)
-        let price = balanceInPreferredCurrency == balance.quantity ? "" : balance.quantity.stringValue
-        let priceInUSD = NumberFormatter.usd.string(from: balanceInPreferredCurrency) ?? ""
+        let balanceInAccountingCurrency = self.balanceInAccountingCurrency(balance: balance)
+        let price = balanceInAccountingCurrency == balance.quantity ? "" : balance.quantity.stringValue
+        let priceInUSD = accountingCurrency.formatted(number: balanceInAccountingCurrency ?? .zero)
         return DisplayableBalance(name: balance.currency.name, balanceQuantity: price, priceInUSD: priceInUSD)
     }
 }

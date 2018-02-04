@@ -32,6 +32,14 @@ public class Currency: Hashable, Comparable {
     public static func ==(lhs: Currency, rhs: Currency) -> Bool {
         return lhs.code.lowercased() == rhs.code.lowercased()
     }
+    
+    func formatted(number: NSDecimalNumber) -> String {
+        if let string = NumberFormatter.usd.string(from: number), self == .USD || self == .USDT {
+            return string
+        } else {
+            return "\(number) \(code)"
+        }
+    }
 }
 
 public extension Currency {
