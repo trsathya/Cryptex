@@ -204,16 +204,19 @@ public struct Cryptopia {
                 completion(.cached)
                 
             } else {
-                
-                cryptopiaDataTaskFor(api: apiType) { (response) in
-                    
-                    guard let json = response.json as? [[String: Any]] else { return }
-                    let balances = json.map { Balance(json: $0, currencyStore: self) }.filter { $0.available != .zero }
-                    self.store.balances = balances
-                    self.store.balanceResponse = response.httpResponse
-                    completion(.fetched)
-                    
-                    }.resume()
+                getCurrencies { (_) in
+                    self.getTickers { (_) in
+                        self.cryptopiaDataTaskFor(api: apiType) { (response) in
+                            
+                            guard let json = response.json as? [[String: Any]] else { return }
+                            let balances = json.map { Balance(json: $0, currencyStore: self) }.filter { $0.available != .zero }
+                            self.store.balances = balances
+                            self.store.balanceResponse = response.httpResponse
+                            completion(.fetched)
+                            
+                            }.resume()
+                    }
+                }
             }
         }
         
@@ -336,3 +339,4 @@ extension Cryptopia.API: APIType {
         }
     }
 }
+
