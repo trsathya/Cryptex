@@ -3,3 +3,7 @@
 .build
 
 Package.resolved
+
+UI/Pods
+UI/Podfile.lock
+xcuserdata

@@ -1,0 +1,541 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3629616E1F1AAA3500E3CDC4 /* AllBalancesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3629616D1F1AAA3500E3CDC4 /* AllBalancesVC.swift */; };
+		362961701F1AE96E00E3CDC4 /* PoloniexDepositsWithdrawalsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3629616F1F1AE96E00E3CDC4 /* PoloniexDepositsWithdrawalsVC.swift */; };
+		36322D631F07BE4200565852 /* RefreshableTableVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36322D621F07BE4200565852 /* RefreshableTableVC.swift */; };
+		363D43AF205CEE300051ACE0 /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363D43AE205CEE300051ACE0 /* API.swift */; };
+		36571D301F0165B8009384B5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36571D2F1F0165B8009384B5 /* AppDelegate.swift */; };
+		36571D351F0165B8009384B5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36571D331F0165B8009384B5 /* Main.storyboard */; };
+		36571D371F0165B8009384B5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 36571D361F0165B8009384B5 /* Assets.xcassets */; };
+		36571D3A1F0165B8009384B5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 36571D381F0165B8009384B5 /* LaunchScreen.storyboard */; };
+		36571D4D1F01665D009384B5 /* ExchangeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36571D491F01665D009384B5 /* ExchangeVC.swift */; };
+		3660336C1F49AC300073FD60 /* NotificationSettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3660336B1F49AC300073FD60 /* NotificationSettingsVC.swift */; };
+		3660336F1F49B8970073FD60 /* BackgroundService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3660336E1F49B8970073FD60 /* BackgroundService.swift */; };
+		36A71BDD20057E79000C787D /* BalancesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A71BDC20057E79000C787D /* BalancesVC.swift */; };
+		36DBDB0D1F0A4FAA008254D1 /* Services.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36DBDB0C1F0A4FAA008254D1 /* Services.swift */; };
+		36DBDB131F0B703A008254D1 /* GeminiPastTradesVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36DBDB121F0B703A008254D1 /* GeminiPastTradesVC.swift */; };
+		36DBDB171F0BAACC008254D1 /* PoloniexTradeHistoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36DBDB161F0BAACC008254D1 /* PoloniexTradeHistoryVC.swift */; };
+		36F40C442002202B00DBB666 /* TickersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F40C432002202B00DBB666 /* TickersVC.swift */; };
+		36F47C3E200CE49E0042CD29 /* TickerCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 36F47C3D200CE49E0042CD29 /* TickerCell.xib */; };
+		36F47C40200CE4B60042CD29 /* TickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F47C3F200CE4B60042CD29 /* TickerCell.swift */; };
+		AB9E45B10FDB9BC5A75D3C35 /* Pods_CryptExUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98505E8E244F10195EF280A8 /* Pods_CryptExUI.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3629616D1F1AAA3500E3CDC4 /* AllBalancesVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AllBalancesVC.swift; sourceTree = "<group>"; };
+		3629616F1F1AE96E00E3CDC4 /* PoloniexDepositsWithdrawalsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoloniexDepositsWithdrawalsVC.swift; sourceTree = "<group>"; };
+		36322D621F07BE4200565852 /* RefreshableTableVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RefreshableTableVC.swift; sourceTree = "<group>"; };
+		363D43AE205CEE300051ACE0 /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+		36571D2C1F0165B8009384B5 /* CryptExUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CryptExUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		36571D2F1F0165B8009384B5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		36571D341F0165B8009384B5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		36571D361F0165B8009384B5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		36571D391F0165B8009384B5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		36571D3B1F0165B8009384B5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		36571D491F01665D009384B5 /* ExchangeVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExchangeVC.swift; sourceTree = "<group>"; };
+		3660336B1F49AC300073FD60 /* NotificationSettingsVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationSettingsVC.swift; sourceTree = "<group>"; };
+		3660336E1F49B8970073FD60 /* BackgroundService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundService.swift; sourceTree = "<group>"; };
+		36A71BDC20057E79000C787D /* BalancesVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BalancesVC.swift; sourceTree = "<group>"; };
+		36D619E01FF8032B00DB53AA /* CryptExUI-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CryptExUI-Bridging-Header.h"; sourceTree = "<group>"; };
+		36DBDB0C1F0A4FAA008254D1 /* Services.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Services.swift; sourceTree = "<group>"; };
+		36DBDB121F0B703A008254D1 /* GeminiPastTradesVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeminiPastTradesVC.swift; sourceTree = "<group>"; };
+		36DBDB161F0BAACC008254D1 /* PoloniexTradeHistoryVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PoloniexTradeHistoryVC.swift; sourceTree = "<group>"; };
+		36F40C432002202B00DBB666 /* TickersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickersVC.swift; sourceTree = "<group>"; };
+		36F47C3D200CE49E0042CD29 /* TickerCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TickerCell.xib; sourceTree = "<group>"; };
+		36F47C3F200CE4B60042CD29 /* TickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TickerCell.swift; sourceTree = "<group>"; };
+		51DF0EE0D22C3AAE08627C4D /* Pods-CryptEx.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CryptEx.release.xcconfig"; path = "Pods/Target Support Files/Pods-CryptEx/Pods-CryptEx.release.xcconfig"; sourceTree = "<group>"; };
+		7DC7B7BD002B8C2E97A4BE16 /* Pods_CryptEx.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CryptEx.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		97FCE1AE66BDC9B909204360 /* Pods-CryptExUI.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CryptExUI.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CryptExUI/Pods-CryptExUI.debug.xcconfig"; sourceTree = "<group>"; };
+		98505E8E244F10195EF280A8 /* Pods_CryptExUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CryptExUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB1F919D2D1543EF29A0430C /* Pods-CryptEx.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CryptEx.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CryptEx/Pods-CryptEx.debug.xcconfig"; sourceTree = "<group>"; };
+		FFB59A5D3643B49BC599307D /* Pods-CryptExUI.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CryptExUI.release.xcconfig"; path = "Pods/Target Support Files/Pods-CryptExUI/Pods-CryptExUI.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		36571D291F0165B8009384B5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB9E45B10FDB9BC5A75D3C35 /* Pods_CryptExUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0B1D27ADCE3833012D92AFF8 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EB1F919D2D1543EF29A0430C /* Pods-CryptEx.debug.xcconfig */,
+				51DF0EE0D22C3AAE08627C4D /* Pods-CryptEx.release.xcconfig */,
+				97FCE1AE66BDC9B909204360 /* Pods-CryptExUI.debug.xcconfig */,
+				FFB59A5D3643B49BC599307D /* Pods-CryptExUI.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		217CD4D7D73DD148DC0AB455 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7DC7B7BD002B8C2E97A4BE16 /* Pods_CryptEx.framework */,
+				98505E8E244F10195EF280A8 /* Pods_CryptExUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3642A05F1F04ED7A0039FC89 /* Gemini */ = {
+			isa = PBXGroup;
+			children = (
+				36DBDB121F0B703A008254D1 /* GeminiPastTradesVC.swift */,
+			);
+			path = Gemini;
+			sourceTree = "<group>";
+		};
+		3642A0621F04ED7A0039FC89 /* Poloniex */ = {
+			isa = PBXGroup;
+			children = (
+				36DBDB161F0BAACC008254D1 /* PoloniexTradeHistoryVC.swift */,
+				3629616F1F1AE96E00E3CDC4 /* PoloniexDepositsWithdrawalsVC.swift */,
+			);
+			path = Poloniex;
+			sourceTree = "<group>";
+		};
+		36571D231F0165B8009384B5 = {
+			isa = PBXGroup;
+			children = (
+				36571D2E1F0165B8009384B5 /* CryptEx */,
+				36571D2D1F0165B8009384B5 /* Products */,
+				0B1D27ADCE3833012D92AFF8 /* Pods */,
+				217CD4D7D73DD148DC0AB455 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		36571D2D1F0165B8009384B5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				36571D2C1F0165B8009384B5 /* CryptExUI.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		36571D2E1F0165B8009384B5 /* CryptEx */ = {
+			isa = PBXGroup;
+			children = (
+				36571D2F1F0165B8009384B5 /* AppDelegate.swift */,
+				36571D331F0165B8009384B5 /* Main.storyboard */,
+				36F47C3D200CE49E0042CD29 /* TickerCell.xib */,
+				36F47C3F200CE4B60042CD29 /* TickerCell.swift */,
+				36571D441F0165F4009384B5 /* ViewController */,
+				36571D411F0165F4009384B5 /* API */,
+				3660336D1F49B88B0073FD60 /* BackgroundServices */,
+				36571D361F0165B8009384B5 /* Assets.xcassets */,
+				36571D381F0165B8009384B5 /* LaunchScreen.storyboard */,
+				36571D3B1F0165B8009384B5 /* Info.plist */,
+				36D619E01FF8032B00DB53AA /* CryptExUI-Bridging-Header.h */,
+			);
+			path = CryptEx;
+			sourceTree = "<group>";
+		};
+		36571D411F0165F4009384B5 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				363D43AE205CEE300051ACE0 /* API.swift */,
+				36DBDB0C1F0A4FAA008254D1 /* Services.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		36571D441F0165F4009384B5 /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				36322D621F07BE4200565852 /* RefreshableTableVC.swift */,
+				36F40C432002202B00DBB666 /* TickersVC.swift */,
+				36A71BDC20057E79000C787D /* BalancesVC.swift */,
+				36571D491F01665D009384B5 /* ExchangeVC.swift */,
+				36A4696A1F1A1F1800C59391 /* All */,
+				3642A05F1F04ED7A0039FC89 /* Gemini */,
+				3642A0621F04ED7A0039FC89 /* Poloniex */,
+				3660336A1F49ABF80073FD60 /* Settings */,
+			);
+			path = ViewController;
+			sourceTree = "<group>";
+		};
+		3660336A1F49ABF80073FD60 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				3660336B1F49AC300073FD60 /* NotificationSettingsVC.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		3660336D1F49B88B0073FD60 /* BackgroundServices */ = {
+			isa = PBXGroup;
+			children = (
+				3660336E1F49B8970073FD60 /* BackgroundService.swift */,
+			);
+			path = BackgroundServices;
+			sourceTree = "<group>";
+		};
+		36A4696A1F1A1F1800C59391 /* All */ = {
+			isa = PBXGroup;
+			children = (
+				3629616D1F1AAA3500E3CDC4 /* AllBalancesVC.swift */,
+			);
+			path = All;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		36571D2B1F0165B8009384B5 /* CryptExUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 36571D3E1F0165B8009384B5 /* Build configuration list for PBXNativeTarget "CryptExUI" */;
+			buildPhases = (
+				E25C289D8C0DD8B8DECFFE90 /* [CP] Check Pods Manifest.lock */,
+				36571D281F0165B8009384B5 /* Sources */,
+				36571D291F0165B8009384B5 /* Frameworks */,
+				36571D2A1F0165B8009384B5 /* Resources */,
+				07E30BBD5C30BECFD26E5977 /* [CP] Embed Pods Frameworks */,
+				FF39C408301C878DD2547544 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CryptExUI;
+			productName = CryptEx;
+			productReference = 36571D2C1F0165B8009384B5 /* CryptExUI.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		36571D241F0165B8009384B5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0830;
+				LastUpgradeCheck = 0900;
+				ORGANIZATIONNAME = Sathyakumar;
+				TargetAttributes = {
+					36571D2B1F0165B8009384B5 = {
+						CreatedOnToolsVersion = 8.3.3;
+						LastSwiftMigration = 0920;
+						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.Push = {
+								enabled = 0;
+							};
+							com.apple.iCloud = {
+								enabled = 0;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = 36571D271F0165B8009384B5 /* Build configuration list for PBXProject "CryptExUI" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 36571D231F0165B8009384B5;
+			productRefGroup = 36571D2D1F0165B8009384B5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				36571D2B1F0165B8009384B5 /* CryptExUI */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		36571D2A1F0165B8009384B5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36571D3A1F0165B8009384B5 /* LaunchScreen.storyboard in Resources */,
+				36571D371F0165B8009384B5 /* Assets.xcassets in Resources */,
+				36571D351F0165B8009384B5 /* Main.storyboard in Resources */,
+				36F47C3E200CE49E0042CD29 /* TickerCell.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		07E30BBD5C30BECFD26E5977 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-CryptExUI/Pods-CryptExUI-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Cryptex/Cryptex.framework",
+				"${BUILT_PRODUCTS_DIR}/CryptoSwift/CryptoSwift.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Cryptex.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CryptoSwift.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CryptExUI/Pods-CryptExUI-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E25C289D8C0DD8B8DECFFE90 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-CryptExUI-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FF39C408301C878DD2547544 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CryptExUI/Pods-CryptExUI-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		36571D281F0165B8009384B5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36F47C40200CE4B60042CD29 /* TickerCell.swift in Sources */,
+				362961701F1AE96E00E3CDC4 /* PoloniexDepositsWithdrawalsVC.swift in Sources */,
+				36DBDB0D1F0A4FAA008254D1 /* Services.swift in Sources */,
+				3660336C1F49AC300073FD60 /* NotificationSettingsVC.swift in Sources */,
+				36571D301F0165B8009384B5 /* AppDelegate.swift in Sources */,
+				36DBDB171F0BAACC008254D1 /* PoloniexTradeHistoryVC.swift in Sources */,
+				3660336F1F49B8970073FD60 /* BackgroundService.swift in Sources */,
+				36A71BDD20057E79000C787D /* BalancesVC.swift in Sources */,
+				36322D631F07BE4200565852 /* RefreshableTableVC.swift in Sources */,
+				36571D4D1F01665D009384B5 /* ExchangeVC.swift in Sources */,
+				36DBDB131F0B703A008254D1 /* GeminiPastTradesVC.swift in Sources */,
+				363D43AF205CEE300051ACE0 /* API.swift in Sources */,
+				3629616E1F1AAA3500E3CDC4 /* AllBalancesVC.swift in Sources */,
+				36F40C442002202B00DBB666 /* TickersVC.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		36571D331F0165B8009384B5 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				36571D341F0165B8009384B5 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		36571D381F0165B8009384B5 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				36571D391F0165B8009384B5 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		36571D3C1F0165B8009384B5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		36571D3D1F0165B8009384B5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		36571D3F1F0165B8009384B5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 97FCE1AE66BDC9B909204360 /* Pods-CryptExUI.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = CryptEx/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.organization.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "CryptEx/CryptExUI-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Debug;
+		};
+		36571D401F0165B8009384B5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FFB59A5D3643B49BC599307D /* Pods-CryptExUI.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = CryptEx/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.organization.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "CryptEx/CryptExUI-Bridging-Header.h";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		36571D271F0165B8009384B5 /* Build configuration list for PBXProject "CryptExUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				36571D3C1F0165B8009384B5 /* Debug */,
+				36571D3D1F0165B8009384B5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		36571D3E1F0165B8009384B5 /* Build configuration list for PBXNativeTarget "CryptExUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				36571D3F1F0165B8009384B5 /* Debug */,
+				36571D401F0165B8009384B5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 36571D241F0165B8009384B5 /* Project object */;
+}
