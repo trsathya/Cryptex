@@ -138,14 +138,22 @@ public struct Kraken {
                 completion(.cached)
             } else {
                 krakenDataTaskFor(api: apiType) { (response) in
-                    guard let json = response.json as? [[String: String]] else {
+                    
+                    guard let json = response.json as? Dictionary<String, Any> else {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
+                    let arrayOfCryptoBalances = json["result"] as! Dictionary<String,String>
                     var balances: [Balance] = []
-                    json.forEach({ (dictionary) in
-                        balances.append(Balance(json: dictionary, currencyStore: self))
-                    })
+                    
+                    for cryptoBalance in arrayOfCryptoBalances {
+                        let newBalance = ["type": cryptoBalance.key,
+                                          "amount": cryptoBalance.value,
+                                          "available": cryptoBalance.value]
+                        
+                        balances.append(Balance(json: newBalance, currencyStore: self))
+                    }
+                    
                     self.store.balances = balances
                     self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
