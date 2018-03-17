@@ -120,24 +120,26 @@ public struct BitGrail {
                 
             } else {
                 
-                bitGrailDataTaskFor(api: apiType) { (response) in
-                    guard let balancesJSON = response.json as? [String: Any] else { return }
-                    
-                    var balances: [Balance] = []
-                    balancesJSON.forEach({ (arg) in
-                        guard let value = arg.value as? [String: String] else { return }
-                        let currency = self.forCode(arg.key)
-                        let balance = Balance(json: value, currency: currency)
-                        if balance.quantity != .zero {
-                            balances.append(balance)
-                        }
-                    })
-
-                    self.store.balances = balances
-                    self.store.balanceResponse = response.httpResponse
-                    completion(.fetched)
-                    
-                    }.resume()
+                getTickers(completion: { (_) in
+                    self.bitGrailDataTaskFor(api: apiType) { (response) in
+                        guard let balancesJSON = response.json as? [String: Any] else { return }
+                        
+                        var balances: [Balance] = []
+                        balancesJSON.forEach({ (arg) in
+                            guard let value = arg.value as? [String: String] else { return }
+                            let currency = self.forCode(arg.key)
+                            let balance = Balance(json: value, currency: currency)
+                            if balance.quantity != .zero {
+                                balances.append(balance)
+                            }
+                        })
+                        
+                        self.store.balances = balances
+                        self.store.balanceResponse = response.httpResponse
+                        completion(.fetched)
+                        
+                        }.resume()
+                })
             }
         }
         
@@ -205,8 +207,8 @@ extension BitGrail.API: APIType {
     
     public var loggingEnabled: LogLevel {
         switch self {
-        case .getMarkets: return .url
-        case .getBalance: return .url
+        case .getMarkets: return .response
+        case .getBalance: return .response
         }
     }
     

@@ -88,7 +88,7 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
         } else if let ticker = (tickerByName.filter {$0.symbol == cryptoCurrencyPair}).first {
             return balance.quantity.multiplying(by: ticker.price(in: accountingCurrency))
         } else {
-            return balance.quantity
+            return nil
         }
     }
     

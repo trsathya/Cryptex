@@ -23,12 +23,4 @@ public struct UserPreference {
     public static let USDT_BTC = UserPreference(fiat: .USDT, crypto: .Bitcoin, ignoredFiats: [])
 }
 
-public struct Accounting<T: TickerType> {
-    public var currencies: [Currency]
-    public var tickers: [String: T]
-    
-    init(currencies: [Currency], tickers: [String: T]) {
-        self.currencies = currencies
-        self.tickers = tickers
-    }
-}
+
