@@ -6,4 +6,9 @@ Package.resolved
 
 UI/Pods
 UI/Podfile.lock
-xcuserdata
+**/xcuserdata/**/*
+**/xcshareddata/**/*
+
+# Carthage
+Carthage
+
