@@ -18,12 +18,12 @@ Cryptex, a single Swift 4 library and an iOS app to watch prices and check realt
 
 To install all exchanges
 ```ruby
-pod 'Cryptex', '~> 0.0.4'
+pod 'Cryptex', '~> 0.0.5'
 ```
 
 To install only one exchange
 ```ruby
-pod 'Cryptex/Gemini', '~> 0.0.4'
+pod 'Cryptex/Gemini', '~> 0.0.5'
 ```
 
 To install two or more exchanges
@@ -34,14 +34,14 @@ pod 'Cryptex', '~> 0.0.4', :subspecs => ['Gemini', 'GDAX', "Poloniex"]
 #### Carthage (iOS 8+, OS X 10.9+)
 
 ```
-github "trsathya/Cryptex" ~> 0.0.4
+github "trsathya/Cryptex" ~> 0.0.5
 ```
 
 #### Swift Package Manager
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/trsathya/Cryptex.git", from: "0.0.4"),
+    .Package(url: "https://github.com/trsathya/Cryptex.git", from: "0.0.5"),
 ]
 ```
 
