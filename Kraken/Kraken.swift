@@ -176,7 +176,7 @@ public struct Kraken {
                 var postDataDictionary = api.postData
                 
                 let timestamp = NSDate().timeIntervalSince1970
-                let nonce = "\(Int64(timestamp*1000)())"
+                let nonce = "\(Int64(timestamp*1000))"
                 postDataDictionary["nonce"] = nonce
                 //postDataDictionary?["otp"] = "123456"
                 
