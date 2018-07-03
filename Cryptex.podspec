@@ -1,14 +1,15 @@
 Pod::Spec.new do |s|
   s.name         = "Cryptex"
-  s.version      = "0.0.5"
+  s.version      = "0.0.6"
   s.summary      = "Cryptocurrency Exchange API Clients in Swift."
   s.description  = <<-DESC
                    Multiple crypto currency exchange api clients in swift.
+                   This version has been modified by Mathias Klenk.
                    DESC
-  s.homepage     = "https://github.com/trsathya/cryptex"
+  s.homepage     = "https://github.com/mattk90/Cryptex"
   s.license      = "MIT"
-  s.author       = "Sathyakumar Rajaraman"
-  s.source       = { :git => "https://github.com/trsathya/cryptex.git", :tag => "#{s.version}" }
+  s.author       = "Sathyakumar Rajaraman / Mathias Klenk"
+  s.source       = { :git => "https://github.com/mattk90/Cryptex", :tag => "#{s.version}" }
   s.ios.deployment_target = "8.0"
   s.osx.deployment_target = "10.9"
   s.watchos.deployment_target = "2.0"

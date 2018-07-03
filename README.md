@@ -6,7 +6,7 @@ Cryptex, a single Swift 4 library to access multiple crypto currency exchange AP
 
 ## Requirements
 
-- iOS 8.0+ | macOS 10.10+ | tvOS 9.0+ | watchOS 2.0+ 
+- iOS 8.0+ | macOS 10.10+ | tvOS 9.0+ | watchOS 2.0+
 - Xcode 8.3+
 
 ## Integration
@@ -15,30 +15,30 @@ Cryptex, a single Swift 4 library to access multiple crypto currency exchange AP
 
 To install all exchanges
 ```ruby
-pod 'Cryptex', '~> 0.0.4'
+pod 'Cryptex', :git => 'https://github.com/mattk90/Cryptex'
 ```
 
 To install only one exchange
 ```ruby
-pod 'Cryptex/Gemini', '~> 0.0.4'
+pod 'Cryptex/Gemini', '~> 0.0.6'
 ```
 
 To install two or more exchanges
 ```ruby
-pod 'Cryptex', '~> 0.0.4', :subspecs => ['Gemini', 'GDAX', "Poloniex"]
+pod 'Cryptex', '~> 0.0.6', :subspecs => ['Gemini', 'GDAX', "Poloniex"]
 ```
 
 #### Carthage (iOS 8+, OS X 10.9+)
 
 ```
-github "trsathya/Cryptex" ~> 0.0.4
+github "trsathya/Cryptex" ~> 0.0.6
 ```
 
 #### Swift Package Manager
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/trsathya/Cryptex.git", from: "0.0.4"),
+    .Package(url: "https://github.com/mattk90/Cryptex", from: "0.0.6"),
 ]
 ```
 
@@ -65,12 +65,12 @@ coinMarketCapService.getGlobal { (_) in
 GET https://api.coinmarketcap.com/v1/global
 200 https://api.coinmarketcap.com/v1/global/
 Response Data: {
-    "total_market_cap_usd": 585234214361.0, 
-    "total_24h_volume_usd": 22202189284.0, 
-    "bitcoin_percentage_of_market_cap": 34.15, 
-    "active_currencies": 896, 
-    "active_assets": 567, 
-    "active_markets": 8187, 
+    "total_market_cap_usd": 585234214361.0,
+    "total_24h_volume_usd": 22202189284.0,
+    "bitcoin_percentage_of_market_cap": 34.15,
+    "active_currencies": 896,
+    "active_assets": 567,
+    "active_markets": 8187,
     "last_updated": 1517118863
 }
 Optional(Cryptex.CoinMarketCap.GlobalMarketData(marketCap: 585234214361, volume24Hrs: 22202189284, bitcoinDominance: 34.15, activeCurrencies: 896, activeAssets: 567, activeMarkets: 8187, lastUpdated: 1517118863))
@@ -96,8 +96,8 @@ GET https://api.gemini.com/v1/pubticker/ETHUSD
 200 https://api.gemini.com/v1/pubticker/ETHUSD
 200 https://api.gemini.com/v1/pubticker/BTCUSD
 [
-BTCUSD : 11721 USD, 
-ETHBTC : 0.0977 BTC, 
+BTCUSD : 11721 USD,
+ETHBTC : 0.0977 BTC,
 ETHUSD : 1148.99 USD]
 ```
 Or
