@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "Cryptex"
-  s.version      = "0.0.6"
+  s.version      = "0.0.7"
   s.summary      = "Cryptocurrency Exchange API Clients in Swift."
   s.description  = <<-DESC
                    Multiple crypto currency exchange api clients in swift.
