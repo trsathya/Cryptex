@@ -20,7 +20,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "Cryptex",
-            dependencies: ["CryptoSwift"], path: ".", exclude: ["Tests"]),
+            dependencies: ["CryptoSwift"], path: ".", exclude: ["Tests", "CryptexTests"]),
         .testTarget(
             name: "CryptexTests",
             dependencies: ["Cryptex"]),
