@@ -4,7 +4,6 @@ Pod::Spec.new do |s|
   s.summary      = "Cryptocurrency Exchange API Clients in Swift."
   s.description  = <<-DESC
                    Multiple crypto currency exchange api clients in swift.
-                   This version has been modified by Mathias Klenk.
                    DESC
   s.homepage     = "https://github.com/trsathya/cryptex"
   s.license      = "MIT"
