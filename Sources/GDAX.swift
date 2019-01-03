@@ -9,6 +9,8 @@
 import Foundation
 import CryptoSwift
 
+// GDAX has been renamed to Coinbase Pro. All varables wills stay the same and the API will have the same functionality but just point to the new endpoint https://api.pro.coinbase.com/
+
 extension CurrencyPair {
     
     var gdaxProductId: String {
@@ -223,7 +225,7 @@ public struct GDAX {
 
 extension GDAX.API: APIType {
     public var host: String {
-        return "https://api.gdax.com"
+        return "https://api.pro.coinbase.com"
     }
     
     public var path: String {

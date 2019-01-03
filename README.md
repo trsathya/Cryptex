@@ -3,13 +3,13 @@
 ![Swift 4.0](https://img.shields.io/badge/Swift-4.0-brightgreen.svg) ![CocoaPods](https://img.shields.io/cocoapods/v/Cryptex.svg) [![GitHub release](https://img.shields.io/github/release/trsathya/Cryptex.svg)](https://github.com/trsathya/Cryptex/releases) ![Cocoapods Downloads](https://img.shields.io/cocoapods/dt/Cryptex.svg) ![Apps](https://img.shields.io/cocoapods/at/Cryptex.svg) ![Github Commits Since last release](https://img.shields.io/github/commits-since/trsathya/Cryptex/latest.svg) ![badge-mit]
 ![badge-platforms] ![badge-pms]
 
-Cryptex, a single Swift 4 library and an iOS app to watch prices and check realtime account balances across multiple cryptocurrency exchanges. Trading features are coming soon. 
+Cryptex, a single Swift 4 library and an iOS app to watch prices and check realtime account balances across multiple cryptocurrency exchanges. Trading features are coming soon.
 
 ![Sample App UI](SampleAppUI.png)
 
 ## Requirements
 
-- iOS 9.0+ | macOS 10.10+ | tvOS 9.0+ | watchOS 2.0+ 
+- iOS 9.0+ | macOS 10.10+ | tvOS 9.0+ | watchOS 2.0+
 - Xcode 8.3+
 
 ## Integration
@@ -18,30 +18,30 @@ Cryptex, a single Swift 4 library and an iOS app to watch prices and check realt
 
 To install all exchanges
 ```ruby
-pod 'Cryptex', '~> 0.0.5'
+pod 'Cryptex', '~> 0.0.6'
 ```
 
 To install only one exchange
 ```ruby
-pod 'Cryptex/Gemini', '~> 0.0.5'
+pod 'Cryptex/Gemini', '~> 0.0.6'
 ```
 
 To install two or more exchanges
 ```ruby
-pod 'Cryptex', '~> 0.0.4', :subspecs => ['Gemini', 'GDAX', "Poloniex"]
+pod 'Cryptex', '~> 0.0.6', :subspecs => ['Gemini', 'GDAX', "Poloniex"]
 ```
 
 #### Carthage (iOS 8+, OS X 10.9+)
 
 ```
-github "trsathya/Cryptex" ~> 0.0.5
+github "trsathya/Cryptex" ~> 0.0.6
 ```
 
 #### Swift Package Manager
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/trsathya/Cryptex.git", from: "0.0.5"),
+    .Package(url: "https://github.com/trsathya/Cryptex", from: "0.0.6"),
 ]
 ```
 
@@ -68,12 +68,12 @@ coinMarketCapService.getGlobal { (_) in
 GET https://api.coinmarketcap.com/v1/global
 200 https://api.coinmarketcap.com/v1/global/
 Response Data: {
-    "total_market_cap_usd": 585234214361.0, 
-    "total_24h_volume_usd": 22202189284.0, 
-    "bitcoin_percentage_of_market_cap": 34.15, 
-    "active_currencies": 896, 
-    "active_assets": 567, 
-    "active_markets": 8187, 
+    "total_market_cap_usd": 585234214361.0,
+    "total_24h_volume_usd": 22202189284.0,
+    "bitcoin_percentage_of_market_cap": 34.15,
+    "active_currencies": 896,
+    "active_assets": 567,
+    "active_markets": 8187,
     "last_updated": 1517118863
 }
 Optional(Cryptex.CoinMarketCap.GlobalMarketData(marketCap: 585234214361, volume24Hrs: 22202189284, bitcoinDominance: 34.15, activeCurrencies: 896, activeAssets: 567, activeMarkets: 8187, lastUpdated: 1517118863))
@@ -99,8 +99,8 @@ GET https://api.gemini.com/v1/pubticker/ETHUSD
 200 https://api.gemini.com/v1/pubticker/ETHUSD
 200 https://api.gemini.com/v1/pubticker/BTCUSD
 [
-BTCUSD : 11721 USD, 
-ETHBTC : 0.0977 BTC, 
+BTCUSD : 11721 USD,
+ETHBTC : 0.0977 BTC,
 ETHUSD : 1148.99 USD]
 ```
 Or
