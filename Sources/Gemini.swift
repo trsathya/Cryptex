@@ -52,7 +52,7 @@ public struct Gemini {
             guard let json = json as? [String: Any] else { return nil }
             
             if let array = json["bids"] as? [Any] {
-                bids = array.flatMap({ bid -> LimitOrder? in
+                bids = array.compactMap({ bid -> LimitOrder? in
                     return LimitOrder(json: bid)
                 })
             } else {
@@ -60,7 +60,7 @@ public struct Gemini {
             }
             
             if let array = json["asks"] as? [Any] {
-                asks = array.flatMap({ ask -> LimitOrder? in
+                asks = array.compactMap({ ask -> LimitOrder? in
                     return LimitOrder(json: ask)
                 })
             } else {
@@ -178,7 +178,7 @@ public struct Gemini {
                         completion(.unexpected(response))
                         return
                     }
-                    let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self) }
+                    let geminiSymbols = stringArray.compactMap { CurrencyPair(symbol: $0, currencyStore: self) }
                     self.store.symbolsResponse = (response.httpResponse, geminiSymbols)
                     completion(.fetched)
                 }, failure: nil).resume()
@@ -230,7 +230,7 @@ public struct Gemini {
                         return
                         
                     }
-                    let balances = array.flatMap {Gemini.Balance(json: $0, currencyStore: self)}
+                    let balances = array.compactMap {Gemini.Balance(json: $0, currencyStore: self)}
                     self.store.balances = balances
                     self.store.balanceResponse = response.httpResponse
                     completion(.fetched)
@@ -248,7 +248,7 @@ public struct Gemini {
                         completion(currencyPair, .unexpected(response))
                         return
                     }
-                    let pastTrades = array.flatMap {Gemini.PastTrade(json: $0, currencyStore: self)}
+                    let pastTrades = array.compactMap {Gemini.PastTrade(json: $0, currencyStore: self)}
                     self.store.pastTradesResponse[currencyPair.displaySymbol] = (response.httpResponse, pastTrades)
                     completion(currencyPair, .fetched)
                 }, failure: failure).resume()

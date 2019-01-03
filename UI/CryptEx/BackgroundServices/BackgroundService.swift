@@ -65,7 +65,7 @@ class LocalNotificationService {
             content.title = NSString.localizedUserNotificationString(forKey: title, arguments: nil)
         }
         content.body = NSString.localizedUserNotificationString(forKey: message, arguments: nil)
-        content.sound = UNNotificationSound.default()
+        content.sound = UNNotificationSound.default
         // Deliver the notification in five seconds.
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger) // Schedule the notification.

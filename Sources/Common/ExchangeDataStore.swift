@@ -21,7 +21,7 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
     
     public var tickersDictionary: [String: T] = [:] {
         didSet {
-            let tickers = tickersDictionary.values.flatMap{$0}
+            let tickers = tickersDictionary.values.compactMap{$0}
             var byQuantityCCY: [Currency: [T]] = [:]
             var byPriceCCY: [Currency: [T]] = [:]
             Set(tickers.map { $0.symbol.quantity }).forEach { byQuantityCCY[$0] = [] }
@@ -34,7 +34,7 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
                 guard let left = leftArray.first, let right = rightArray.first else { return false }
                 return left.price(in: accountingCurrency).compare(right.price(in: accountingCurrency)) == .orderedDescending
             })
-            tickerByPriceCCY = byPriceCCY.keys.flatMap { byPriceCCY[$0] }
+            tickerByPriceCCY = byPriceCCY.keys.compactMap { byPriceCCY[$0] }
             tickerByName = tickers.sorted(by: { (left, right) -> Bool in
                 return left.symbol.displaySymbol < right.symbol.displaySymbol
             })
@@ -69,7 +69,7 @@ public class ExchangeDataStore<T: TickerType, U: BalanceType> {
     public func setTicker(ticker: T, symbol: String) {
         var temp = tickersDictionary
         temp[symbol] = ticker
-        setTickersInDictionary(tickers: temp.values.flatMap{$0})
+        setTickersInDictionary(tickers: temp.values.compactMap{$0})
     }
     
     public func setTickersInDictionary(tickers: [T]) {

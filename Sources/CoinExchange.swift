@@ -150,7 +150,7 @@ public struct CoinExchange {
                 coinExchangeDataTaskFor(api: apiType) { (response) in
                     guard let marketSummaries = response.json as? [[String: String]] else { return }
                     
-                    let tickers = marketSummaries.flatMap { MarketSummary(json: $0, markets: self.store.currencyPairsResponse.currencyPairs) }
+                    let tickers = marketSummaries.compactMap { MarketSummary(json: $0, markets: self.store.currencyPairsResponse.currencyPairs) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
                     self.store.tickersResponse = response.httpResponse

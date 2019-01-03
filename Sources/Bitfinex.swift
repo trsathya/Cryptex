@@ -82,7 +82,7 @@ public struct Bitfinex {
                         completion(.unexpected(response))
                         return
                     }
-                    let geminiSymbols = stringArray.flatMap { CurrencyPair(symbol: $0, currencyStore: self) }
+                    let geminiSymbols = stringArray.compactMap { CurrencyPair(symbol: $0, currencyStore: self) }
                     self.store.symbolsResponse = (response.httpResponse, geminiSymbols)
                     completion(.fetched)
                 }).resume()

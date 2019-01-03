@@ -108,7 +108,7 @@ public struct CoinMarketCap {
                 coinExchangeDataTaskFor(api: apiType) { (response) in
                     guard let marketSummaries = response.json as? [[String: String]] else { return }
                     
-                    let tickers: [CMCTicker] = marketSummaries.flatMap { CMCTicker(json: $0) }
+                    let tickers: [CMCTicker] = marketSummaries.compactMap { CMCTicker(json: $0) }
                     self.store.setTickersInDictionary(tickers: tickers)
                     
                     self.store.tickerResponse = (response.httpResponse, tickers)

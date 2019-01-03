@@ -30,7 +30,7 @@ public struct Binance {
             canWithdraw = json["canWithdraw"] as? Bool ?? false
             canDeposit = json["canDeposit"] as? Bool ?? false
             if let balancesJSON = json["balances"] as? [[String: String]] {
-                balances = balancesJSON.flatMap { Balance(json: $0, currencyStore: currencyStore) }
+                balances = balancesJSON.compactMap { Balance(json: $0, currencyStore: currencyStore) }
             } else {
                 balances = []
             }

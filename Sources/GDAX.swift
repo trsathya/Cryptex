@@ -173,7 +173,7 @@ public struct GDAX {
                         print("Error: Cast Failed in \(#function)")
                         return
                     }
-                    let accounts = json.flatMap {GDAX.Account(json: $0, currencyStore: self)}
+                    let accounts = json.compactMap {GDAX.Account(json: $0, currencyStore: self)}
                     self.store.balances = accounts
                     self.store.accountsResponse = (response.httpResponse, accounts)
                     completion(.fetched)
