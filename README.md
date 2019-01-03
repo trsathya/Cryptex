@@ -15,7 +15,7 @@ Cryptex, a single Swift 4 library to access multiple crypto currency exchange AP
 
 To install all exchanges
 ```ruby
-pod 'Cryptex', :git => 'https://github.com/mattk90/Cryptex'
+pod 'Cryptex', '~> 0.0.6'
 ```
 
 To install only one exchange
@@ -38,7 +38,7 @@ github "trsathya/Cryptex" ~> 0.0.6
 
 ```swift
 dependencies: [
-    .Package(url: "https://github.com/mattk90/Cryptex", from: "0.0.6"),
+    .Package(url: "https://github.com/trsathya/Cryptex", from: "0.0.6"),
 ]
 ```
 
