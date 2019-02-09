@@ -1,6 +1,6 @@
 # Cryptex - iOS SDK for crypto currencies in Swift 4
 
-![Swift 4.2](https://img.shields.io/badge/Swift-4.2-brightgreen.svg) ![CocoaPods](https://img.shields.io/cocoapods/v/Cryptex.svg) [![GitHub release](https://img.shields.io/github/release/trsathya/Cryptex.svg)](https://github.com/trsathya/Cryptex/releases) ![Cocoapods Downloads](https://img.shields.io/cocoapods/dt/Cryptex.svg) ![Apps](https://img.shields.io/cocoapods/at/Cryptex.svg) ![Github Commits Since last release](https://img.shields.io/github/commits-since/trsathya/Cryptex/latest.svg) ![badge-mit]
+![Swift 4.2](https://img.shields.io/badge/Swift-4.2-brightgreen.svg) ![CocoaPods](https://img.shields.io/cocoapods/v/Cryptex.svg) [![GitHub release](https://img.shields.io/github/release/trsathya/Cryptex.svg)](https://github.com/trsathya/Cryptex/releases) ![Github Commits Since last release](https://img.shields.io/github/commits-since/trsathya/Cryptex/latest.svg) ![badge-mit]
 ![badge-platforms] ![badge-pms]
 
 Cryptex, a single Swift 4 library and an iOS app to watch prices and check realtime account balances across multiple cryptocurrency exchanges. Trading features are coming soon.
