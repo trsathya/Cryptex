@@ -1,6 +1,6 @@
 import XCTest
 @testable import CryptexTests
 
-XCTMain([
-    testCase(CryptexTests.allTests),
-])
+//XCTMain([
+//    testCase(CryptexTests.allTests),
+//])

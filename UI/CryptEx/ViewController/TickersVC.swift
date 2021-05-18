@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class TickersVC: RefreshableTableVC, UITableViewDataSource {
     @IBOutlet weak var toolbar: UIToolbar!
