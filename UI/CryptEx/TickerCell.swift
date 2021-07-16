@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class TickerCell: UITableViewCell {
     @IBOutlet weak var nameLabel: UILabel!

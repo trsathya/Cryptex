@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class BalancesVC: RefreshableTableVC {
     var service: BalanceServiceType!
